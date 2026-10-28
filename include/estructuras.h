@@ -18,5 +18,12 @@
 #define MAX_CATEGORIAS  20  /* Categorias en el sistema */
 #define MAX_GASTOS      500 /* Gastos en total */
 
+/* Capacidades derivadas de las anteriores */
+#define MAX_USUARIOS    (MAX_GRUPOS * MAX_MIEMBROS)  /* Usuarios en el sistema */
+#define MAX_MEMBRESIAS  (MAX_GRUPOS * MAX_MIEMBROS)  /* Pertenencias usuario-grupo en total */
+#define MAX_DIVISIONES  (MAX_GASTOS * MAX_MIEMBROS)  /* Divisiones de gastos en total */
+#define MAX_LIQUIDACIONES MAX_GASTOS                 /* Liquidaciones en total */
+
 #endif /* MICHAYMICHA_ESTRUCTURAS_H */
+
 
