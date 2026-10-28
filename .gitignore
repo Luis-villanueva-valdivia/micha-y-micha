@@ -1,0 +1,20 @@
+# Ejecutables y archivos compilados
+micha
+*.exe
+*.out
+*.o
+*.obj
+build/
+bin/
+
+# Datos que genera el programa al usarse (se conserva la carpeta con .gitkeep)
+data/*
+!data/.gitkeep
+
+# Basura del sistema operativo y del editor
+Thumbs.db
+desktop.ini
+.DS_Store
+.vscode/
+*.layout
+*.depend
