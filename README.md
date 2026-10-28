@@ -1,6 +1,6 @@
 # Micha y Micha
 
-Programa de consola en C que ayuda a los roomies a llevar las cuentas de la casa: registrar quién vive en el departamento, anotar los gastos compartidos y calcular cuánto le debe cada quien a quién.
+**Cuentas claras entre roomies.** Programa de consola en C para que un grupo de roomies registre y divida sus gastos compartidos, consulte el saldo de cada quien y sepa qué transferencias hacer para quedar a mano, con el menor número posible.
 
 Proyecto final de Programación Estructurada — Facultad de Matemáticas, UADY.
 
@@ -12,7 +12,7 @@ Proyecto final de Programación Estructurada — Facultad de Matemáticas, UADY.
 
 ## Tecnologías
 
-Lenguaje C (estándar C11), compilado con GCC. Sin librerías externas, solo la biblioteca estándar (`stdio.h`, `stdlib.h`, `string.h`).
+Lenguaje C (estándar C99), compilado con GCC. Sin librerías externas, solo la biblioteca estándar (`stdio.h`, `stdlib.h`, `string.h`, `ctype.h`).
 
 Temas del curso que se aplican: arreglos, estructuras, apuntadores, funciones y modularidad, condicionales, ciclos y manejo de archivos.
 
@@ -35,12 +35,12 @@ Temas del curso que se aplican: arreglos, estructuras, apuntadores, funciones y 
    ```
    o, sin `make`, directamente con GCC:
    ```bash
-   gcc -Wall -Wextra -std=c11 -Iinclude src/*.c -o micha
+   gcc -Wall -Wextra -std=c99 -Iinclude src/*.c -o michaymicha
    ```
 3. **Ejecutar**:
    ```bash
-   ./micha        # Linux / macOS / Git Bash
-   micha.exe      # Windows (CMD o PowerShell)
+   ./michaymicha       # Linux / macOS / Git Bash
+   michaymicha.exe     # Windows (CMD o PowerShell)
    ```
 
 > Los ejecutables y archivos compilados están en `.gitignore` y nunca se suben al repositorio.
@@ -51,18 +51,24 @@ Temas del curso que se aplican: arreglos, estructuras, apuntadores, funciones y 
 micha-y-micha/
 ├── src/          # archivos .c: main.c y un módulo por tema
 ├── include/      # archivos .h: estructuras, constantes y prototipos de cada módulo
-├── data/         # archivos que el programa guarda y lee (no se suben)
-├── docs/         # propuesta, diagramas, manuales y convenciones
+├── datos/        # archivos que el programa guarda y lee (no se suben)
+├── docs/         # propuesta, planeación, diagramas, manuales y convenciones
 ├── tests/        # casos de prueba con entrada y salida esperada
 └── Makefile      # compila todo con un solo comando
 ```
 
-## Convenciones
+## Documentación
 
-Commits, ramas, nombres y estándares de código: [docs/convenciones.md](docs/convenciones.md).
+- [Propuesta del proyecto](docs/propuesta/VillanuevaLuis_Propuesta.pdf): requerimientos, casos de uso y estándar de codificación.
+- [Planeación](docs/planeacion/planeacion.md): milestones, issues y criterios de aceptación.
+- [Convenciones](docs/convenciones.md): commits, ramas y resumen del estándar de codificación.
 
-## Fechas
+## Incrementos
 
-| Entrega | Fecha |
-|---|---|
-| Entrega final | mié 11/11/2026 |
+| Incremento | Fecha límite | Etiqueta |
+|---|---|---|
+| 1 — Base | lun 26/10/2026 | `v0.1` |
+| 2 — Grupos | vie 30/10/2026 | `v0.2` |
+| 3 — Gastos | mar 03/11/2026 | `v0.3` |
+| 4 — Saldos | sáb 07/11/2026 | `v0.4` |
+| Entrega final | mié 11/11/2026 | `v1.0` |

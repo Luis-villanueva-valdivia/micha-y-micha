@@ -1,5 +1,5 @@
 # Ejecutables y archivos compilados
-micha
+michaymicha
 *.exe
 *.out
 *.o
@@ -8,8 +8,8 @@ build/
 bin/
 
 # Datos que genera el programa al usarse (se conserva la carpeta con .gitkeep)
-data/*
-!data/.gitkeep
+datos/*
+!datos/.gitkeep
 
 # Basura del sistema operativo y del editor
 Thumbs.db

@@ -4,10 +4,10 @@
 #   make clean   borra el ejecutable y los .o
 
 CC      = gcc
-CFLAGS  = -Wall -Wextra -std=c11 -Iinclude
+CFLAGS  = -Wall -Wextra -std=c99 -Iinclude
 SRC     = $(wildcard src/*.c)
 OBJ     = $(SRC:.c=.o)
-EXE     = micha
+EXE     = michaymicha
 
 all: $(EXE)
 

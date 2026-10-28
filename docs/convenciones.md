@@ -1,6 +1,6 @@
 # Convenciones del proyecto — Micha y Micha
 
-Reglas con las que se trabaja el proyecto. Siguen la misma idea que las de Nexus FMAT, adaptadas a un proyecto individual en C.
+Reglas con las que se trabaja el proyecto. El estándar de codificación es el de la **sección 3 de la propuesta** ([docs/propuesta/VillanuevaLuis_Propuesta.pdf](propuesta/VillanuevaLuis_Propuesta.pdf)); aquí se resume y se agregan las reglas de Git y GitHub.
 
 ---
 
@@ -8,21 +8,30 @@ Reglas con las que se trabaja el proyecto. Siguen la misma idea que las de Nexus
 
 | Componente | Versión / estándar |
 |---|---|
-| Lenguaje | C11 (`-std=c11`) |
+| Lenguaje | C99 (`-std=c99`) |
 | Compilador | GCC (MinGW-w64 en Windows) |
 | Banderas | `-Wall -Wextra`: el código debe compilar **sin advertencias** |
+| Bibliotecas | Solo estándar: `stdio.h`, `stdlib.h`, `string.h`, `ctype.h`. Sin `conio.h` (RNF-01) |
+| Editor y depuración | Visual Studio Code y GDB |
 
 **Cómo verificarlo:** `gcc --version` en la terminal.
 
 ---
 
-## 2. Issues y ramas
+## 2. Milestones, issues y tablero
 
-Cada parte del trabajo es un **issue** en GitHub (`ISS-01`, `ISS-02`, …), y así queda el registro de qué se hizo y cuándo.
+- Cada **incremento** de la propuesta (§4.1) es un **milestone** en GitHub con su fecha límite.
+- Cada tarea es un **issue** `ISS-XX`, ligado a sus requerimientos (RF/RNF), con milestone y labels. La lista completa está en [docs/planeacion/planeacion.md](planeacion/planeacion.md).
+- El **tablero** de GitHub Projects tiene las columnas *Pendiente*, *En progreso* y *Hecho*.
+- Al cerrar cada incremento se crea su **etiqueta**: `v0.1`, `v0.2`, `v0.3`, `v0.4`, `v1.0`.
+
+---
+
+## 3. Ramas
 
 ```
 main   ← siempre compila y funciona
-  └── tipo/iss-XX-descripcion   ← una rama por issue (opcional pero recomendado)
+  └── tipo/iss-XX-descripcion   ← una rama por issue (recomendado)
 ```
 
 - Formato de rama: `tipo/iss-XX-descripcion`, con `XX` a dos dígitos, en minúsculas, sin acentos y con guiones.
@@ -31,27 +40,27 @@ main   ← siempre compila y funciona
 
 | Tipo | Uso | Ejemplo |
 |---|---|---|
-| `feature` | Funcionalidad nueva | `feature/iss-03-registro-roomies` |
-| `fix` | Corrección de un error | `fix/iss-08-division-redondeo` |
-| `docs` | Documentación | `docs/iss-01-propuesta` |
-| `test` | Casos de prueba | `test/iss-10-pruebas-gastos` |
-| `chore` | Estructura, Makefile, `.gitignore` | `chore/iss-02-estructura` |
+| `feature` | Funcionalidad nueva | `feature/iss-06-inicio-sesion` |
+| `fix` | Corrección de un error | `fix/iss-15-residuo-division` |
+| `docs` | Documentación | `docs/iss-27-manual-usuario` |
+| `test` | Casos de prueba | `test/iss-26-pruebas-completas` |
+| `chore` | Estructura, Makefile, `.gitignore` | `chore/iss-01-estructura` |
 
 ```bash
 git switch main
 git pull
-git switch -c feature/iss-03-registro-roomies
+git switch -c feature/iss-06-inicio-sesion
 ```
 
 ---
 
-## 3. Commits
+## 4. Commits
 
 Formato: **`tipo: descripción (iss-XX)`**
 
 - `tipo` en minúsculas, de la lista de abajo.
 - Descripción en español, en presente e imperativo, sin punto final, de 72 caracteres o menos.
-- Termina con el issue entre paréntesis.
+- Termina con el issue entre paréntesis. En el commit que termina el issue se agrega `Closes #XX` en una línea aparte para que GitHub lo cierre solo.
 
 | Tipo | Uso |
 |---|---|
@@ -66,77 +75,91 @@ Formato: **`tipo: descripción (iss-XX)`**
 Ejemplos:
 
 ```
-chore: agrega la estructura de carpetas y el Makefile (iss-02)
-docs: agrega la propuesta del proyecto (iss-01)
-feat: registra roomies en un arreglo de estructuras (iss-03)
-fix: evita dividir entre cero si no hay roomies (iss-08)
+chore: agrega la estructura de carpetas y el Makefile (iss-01)
+feat: agrega la division personalizada de gastos (iss-16)
+fix: asigna el residuo de la division al pagador (iss-15)
 ```
 
-Commits **pequeños y seguidos**: uno por cada cosa que ya funcione.
+Commits **pequeños y seguidos**: uno por cada avance que ya funcione.
 
 ---
 
-## 4. Nombres
+## 5. Estándar de codificación (resumen de la propuesta, §3)
 
-| Elemento | Convención | Ejemplo |
+### 5.1 Nombrado
+
+| Elemento | Convención | Ejemplos |
 |---|---|---|
-| Archivos `.c` y `.h` | `snake_case`, el `.h` con el mismo nombre que su `.c` | `gastos.c` / `gastos.h` |
-| Funciones | `snake_case`, empiezan con verbo | `registrar_gasto()`, `calcular_deudas()` |
-| Variables | `snake_case`, descriptivas | `total_gastos`, `num_roomies` |
-| Constantes y macros | `MAYUSCULAS_CON_GUION_BAJO` | `MAX_ROOMIES`, `MAX_NOMBRE` |
-| Estructuras (`typedef`) | `PascalCase`, singular | `Roomie`, `Gasto` |
+| Variables | `camelCase`, en español y descriptivas | `montoCentavos`, `numGastos`, `idPagador` |
+| Contadores de ciclo | Una letra solo en ciclos cortos | `i`, `j` |
+| Funciones | `camelCase`, empiezan con verbo en infinitivo | `registrarGasto()`, `calcularSaldos()` |
+| Estructuras (`typedef struct`) | `PascalCase`, sustantivo en singular | `Usuario`, `Gasto`, `DivisionGasto` |
+| Macros y constantes | `MAYUSCULAS_CON_GUION_BAJO` | `MAX_MIEMBROS`, `ARCHIVO_GASTOS` |
+| Enumeraciones | Tipo en `PascalCase`, valores en mayúsculas | `TipoDivision { DIVISION_IGUAL, DIVISION_PERSONALIZADA }` |
+| Apuntadores | `*` junto al nombre; prefijo `p` solo si aclara | `Gasto *gastos`, `int *pNumGastos` |
+| Archivos | Minúsculas, un módulo por par `.c`/`.h` | `gastos.c`, `gastos.h` |
+| Guardas de encabezado | `MICHAYMICHA_MODULO_H` | `#ifndef MICHAYMICHA_GASTOS_H` |
 
-Los identificadores van en español y sin acentos ni ñ (`anio`, `companero`).
+### 5.2 Módulos
 
----
+| Módulo | Responsabilidad |
+|---|---|
+| `main.c` | Punto de entrada y menú principal |
+| `estructuras.h` | `typedef struct` y macros globales (`MAX_*`) |
+| `usuarios.c/.h` | Alta de usuarios e inicio de sesión |
+| `grupos.c/.h` | Grupos y miembros |
+| `gastos.c/.h` | Registro, división y eliminación de gastos |
+| `saldos.c/.h` | Cálculo de saldos y simplificación de deudas |
+| `reportes.c/.h` | Historial y reportes |
+| `archivos.c/.h` | Guardar y cargar datos |
+| `utilidades.c/.h` | Lectura validada de entradas, fechas y formato de montos |
 
-## 5. Estándares de código
+- Los `.c` van en `src/` y los `.h` en `include/`. Cada `.h` contiene solo prototipos, macros y tipos.
+- **Sin variables globales**: los datos se pasan por apuntador a las funciones.
+- Los montos se guardan en **centavos como `long`** (RNF-04).
 
-### 5.1 Generales
+### 5.3 Formato
 
-- **Indentación de 4 espacios**, sin tabuladores. UTF-8 y salto de línea al final del archivo.
-- **Sin números mágicos.** Todo valor con significado va en una constante: `#define MAX_ROOMIES 10`.
-- **Funciones pequeñas con una sola responsabilidad.** Si pasa de unas 30 líneas, probablemente hace demasiado.
-- **`main.c` solo tiene el menú**; la lógica vive en los módulos.
-- **No repetir código:** si algo se usa en dos lugares, va en una función.
-- **No dejar código comentado** ni `printf` de depuración en lo que se sube a `main`.
+- Sangría de 4 espacios (sin tabuladores) y líneas de máximo 100 caracteres.
+- Llaves estilo K&R: la de apertura en la misma línea; siempre con llaves, incluso en `if` de una línea.
+- Un espacio alrededor de operadores y después de comas; una línea en blanco entre funciones.
+- Una declaración por línea, inicializada al declararse.
+- Funciones cortas (idealmente menos de 40 líneas) con una sola responsabilidad.
 
-### 5.2 Módulos y archivos de encabezado
+### 5.4 Comentarios
 
-- Cada módulo tiene su `.c` en `src/` y su `.h` en `include/`.
-- El `.h` lleva guardas de inclusión y solo contiene estructuras, constantes y prototipos:
-
-```c
-#ifndef GASTOS_H
-#define GASTOS_H
-
-/* ... */
-
-#endif
-```
-
-### 5.3 Comentarios y documentación
-
-- **Todo archivo** empieza con un bloque que dice qué hace.
-- **Toda función** lleva un comentario con qué hace, sus parámetros y qué regresa:
+Encabezado de archivo, al inicio de cada `.c` y `.h`:
 
 ```c
 /*
- * Suma el monto de todos los gastos registrados.
- *
- * gastos:     arreglo de gastos.
- * num_gastos: cuántos gastos hay en el arreglo.
- * Regresa:    el total en pesos.
+ * Archivo:     saldos.c
+ * Proyecto:    Micha y Micha
+ * Autor:       Luis Adrian Villanueva Valdivia
+ * Fecha:       28/10/2026
+ * Version:     1.0
+ * Descripcion: Calculo de saldos por miembro y simplificacion
+ *              de deudas mediante un algoritmo greedy.
  */
 ```
 
-- Dentro del código se comenta el **porqué**, no el qué. Los comentarios van en español.
+Bloque de función, antes de cada función en el `.c`:
 
-### 5.4 Entrada y apuntadores
+```c
+/*
+ * Funcion:     simplificarDeudas
+ * Descripcion: Genera la lista minima de transferencias emparejando
+ *              al mayor deudor con el mayor acreedor.
+ * Parametros:  saldos         - arreglo de saldos en centavos (entrada)
+ *              numMiembros    - cantidad de elementos del arreglo
+ *              transferencias - arreglo donde se escriben los resultados
+ * Retorno:     Numero de transferencias generadas (maximo numMiembros - 1).
+ * Precondic.:  La suma de los saldos es cero.
+ */
+```
 
-- Validar **toda** entrada del usuario (opciones fuera de rango, montos negativos, cadenas demasiado largas).
-- Leer cadenas con `fgets` (nunca `gets`) y respetar el tamaño del arreglo.
-- Comprobar que los apuntadores no sean `NULL` antes de usarlos, y que `fopen` haya funcionado antes de leer o escribir un archivo.
+- Comentarios en línea solo para explicar el **porqué** de una decisión no evidente.
+- Cada `struct` lleva un comentario breve por campo.
+- Se elimina el código comentado o de prueba antes de cada entrega.
 
 ---
 
@@ -144,18 +167,19 @@ Los identificadores van en español y sin acentos ni ñ (`anio`, `companero`).
 
 | Carpeta | Qué va ahí |
 |---|---|
-| `src/` | Archivos `.c`: `main.c` y un archivo por módulo |
-| `include/` | Archivos `.h` de cada módulo |
-| `data/` | Archivos que el programa guarda y lee al usarse (ignorados por Git) |
-| `docs/propuesta/` | Propuesta del proyecto y requerimientos |
-| `docs/diagramas/` | Diagrama de casos de uso y otros diagramas |
-| `docs/manuales/` | Manual de usuario y manual técnico |
-| `tests/` | Casos de prueba: entrada y salida esperada |
+| `src/` | Archivos `.c` |
+| `include/` | Archivos `.h` |
+| `datos/` | `usuarios.txt`, `grupos.txt`, `gastos.txt`, … que genera el programa (ignorados por Git) |
+| `docs/propuesta/` | Propuesta del proyecto (PDF) |
+| `docs/planeacion/` | Milestones e issues |
+| `docs/diagramas/` | Diagramas exportados |
+| `docs/manuales/` | Manual de usuario |
+| `tests/` | Casos de prueba por caso de uso: entrada y salida esperada |
 
 ---
 
 ## 7. Otras reglas
 
 - **`.gitkeep`:** al agregar el primer archivo real a una carpeta, se borra su `.gitkeep` en el mismo commit.
-- **El repositorio es público.** Nunca se suben datos personales reales de roomies en `data/` ni en `tests/`.
+- **El repositorio es público.** Nunca se suben datos personales reales en `datos/` ni en `tests/`.
 - **Antes de cada commit:** `make` compila sin advertencias y el programa corre.
