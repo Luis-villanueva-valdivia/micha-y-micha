@@ -24,6 +24,12 @@
 #define MAX_DIVISIONES  (MAX_GASTOS * MAX_MIEMBROS)  /* Divisiones de gastos en total */
 #define MAX_LIQUIDACIONES MAX_GASTOS                 /* Liquidaciones en total */
 
+/* Longitudes de texto: maximo de caracteres que puede escribir el usuario.
+   Los arreglos de char se declaran con + 1 para el '\0' final. */
+#define LONG_NOMBRE      30 /* Nombre de usuario, grupo o categoria */
+#define LONG_PIN         4 /* PIN de usuario */
+#define LONG_DESCRIPCION 50 /* Descripcion de gasto */
+
 #endif /* MICHAYMICHA_ESTRUCTURAS_H */
 
 
