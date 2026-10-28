@@ -67,8 +67,8 @@ micha-y-micha/
 
 | Incremento | Fecha límite | Etiqueta |
 |---|---|---|
-| 1 — Base | lun 26/10/2026 | `v0.1` |
-| 2 — Grupos | vie 30/10/2026 | `v0.2` |
-| 3 — Gastos | mar 03/11/2026 | `v0.3` |
-| 4 — Saldos | sáb 07/11/2026 | `v0.4` |
+| 1 — Base | vie 30/10/2026 | `v0.1` |
+| 2 — Grupos | lun 02/11/2026 | `v0.2` |
+| 3 — Gastos | jue 05/11/2026 | `v0.3` |
+| 4 — Saldos | lun 09/11/2026 | `v0.4` |
 | Entrega final | mié 11/11/2026 | `v1.0` |

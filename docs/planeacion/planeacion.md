@@ -14,7 +14,7 @@ Programa de consola en C para que un grupo de roomies registre y divida sus gast
 2. **IDs de issues.** Los issues se crean en orden (ISS-01 … ISS-28) antes de abrir cualquier PR. Como el repositorio no tiene issues ni PR previos, ISS-NN = #NN.
 3. **Requerimientos.** Cada issue indica los RF/RNF que cubre, con la numeración de la propuesta (§2).
 4. **Responsable.** Todos los issues son de @Luis-villanueva-valdivia.
-5. **Plan de recorte.** Si al 07/11 algo va atrasado, se quita en este orden: (1) el reporte por persona (ISS-25); (2) el filtro por mes de los reportes; (3) eliminar gasto (ISS-17). Nunca se recortan el registro de gastos, la división, los saldos, la simplificación de deudas ni la persistencia, porque son el núcleo del proyecto.
+5. **Plan de recorte.** Si al 09/11 algo va atrasado, se quita en este orden: (1) el reporte por persona (ISS-25); (2) el filtro por mes de los reportes; (3) eliminar gasto (ISS-17). Nunca se recortan el registro de gastos, la división, los saldos, la simplificación de deudas ni la persistencia, porque son el núcleo del proyecto.
 
 ---
 
@@ -22,13 +22,15 @@ Programa de consola en C para que un grupo de roomies registre y divida sus gast
 
 | Milestone | Fecha límite | Contenido | Requerimientos | Etiqueta |
 |---|---|---|---|---|
-| Incremento 1 — Base | lun 26/10/2026 | Estructuras, utilidades, archivos, usuarios e inicio de sesión | RF-01, 02, 16, 17 | `v0.1` |
-| Incremento 2 — Grupos | vie 30/10/2026 | Grupos, miembros, categorías y menú de administración | RF-03, 04, 05 | `v0.2` |
-| Incremento 3 — Gastos | mar 03/11/2026 | Registro, división igual y personalizada, eliminación | RF-06 a RF-09 | `v0.3` |
-| Incremento 4 — Saldos | sáb 07/11/2026 | Saldos, simplificación de deudas y liquidaciones | RF-10, 11, 12 | `v0.4` |
+| Incremento 1 — Base | vie 30/10/2026 | Estructuras, utilidades, archivos, usuarios e inicio de sesión | RF-01, 02, 16, 17 | `v0.1` |
+| Incremento 2 — Grupos | lun 02/11/2026 | Grupos, miembros, categorías y menú de administración | RF-03, 04, 05 | `v0.2` |
+| Incremento 3 — Gastos | jue 05/11/2026 | Registro, división igual y personalizada, eliminación | RF-06 a RF-09 | `v0.3` |
+| Incremento 4 — Saldos | lun 09/11/2026 | Saldos, simplificación de deudas y liquidaciones | RF-10, 11, 12 | `v0.4` |
 | Entrega final | mié 11/11/2026 | Reportes, pruebas completas, manual de usuario | RF-13, 14, 15 | `v1.0` |
 
 En GitHub, cada milestone se crea con el título de la primera columna y una descripción con el contenido.
+
+**Ajuste de fechas (28/10).** Las fechas de la propuesta (§4.1) se recorrieron porque el código empezó el 28/10. La entrega final no cambia.
 
 ---
 
