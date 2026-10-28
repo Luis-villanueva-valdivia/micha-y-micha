@@ -61,6 +61,7 @@ micha-y-micha/
 
 - [Propuesta del proyecto](docs/propuesta/VillanuevaLuis_Propuesta.pdf): requerimientos, casos de uso y estándar de codificación.
 - [Planeación](docs/planeacion/planeacion.md): milestones, issues y criterios de aceptación.
+- [Calendario](docs/planeacion/calendario.md): qué issue se hace cada día hasta la entrega final.
 - [Convenciones](docs/convenciones.md): commits, ramas y resumen del estándar de codificación.
 
 ## Incrementos
