@@ -8,6 +8,7 @@
  *              una funcion de su modulo; aqui no va logica de negocio.
  */
 #include <stdio.h>
+#include "estructuras.h"
 
 int main(void) {
     printf("Micha y Micha\n");

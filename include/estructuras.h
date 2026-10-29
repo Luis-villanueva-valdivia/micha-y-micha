@@ -35,6 +35,15 @@ typedef enum {
     DIVISION_IGUAL,  /* Todos pagan lo mismo */
     DIVISION_PERSONALIZADA /* Cada participante con la parte que se capture */
 } TipoDivision;
+
+/* Persona registrada en el sistema */
+typedef struct {
+    int id;                       /* Identificador unico de usuario (RF-01) */
+    char nombre[LONG_NOMBRE + 1]; /* Nombre visible, sin repetirse */
+    char pin[LONG_PIN + 1];       /* PIN de 4 digitos; nunca se muestra*/
+    int esAdministrador;           /* 1 si es admin, 0 si es roomie */
+} Usuario;
+
 #endif /* MICHAYMICHA_ESTRUCTURAS_H */
 
 
