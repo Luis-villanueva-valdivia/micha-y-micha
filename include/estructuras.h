@@ -30,6 +30,11 @@
 #define LONG_PIN         4 /* PIN de usuario */
 #define LONG_DESCRIPCION 50 /* Descripcion de gasto */
 
+/* Forma en que se reparte un gasto entre sus participantes (RF-07, RF-08) */
+typedef enum {
+    DIVISION_IGUAL,  /* Todos pagan lo mismo */
+    DIVISION_PERSONALIZADA /* Cada participante con la parte que se capture */
+} TipoDivision;
 #endif /* MICHAYMICHA_ESTRUCTURAS_H */
 
 
