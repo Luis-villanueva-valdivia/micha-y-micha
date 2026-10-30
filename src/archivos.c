@@ -196,3 +196,262 @@ int cargarMiembros(MiembroGrupo miembros[], int *numMiembros) {
     fclose(archivo);
     return 1;
 }
+
+/*
+ * Funcion:     guardarCategorias
+ * Descripcion: Escribe todas las categorias en ARCHIVO_CATEGORIAS, una por
+ *              linea con el formato id|nombre.
+ * Parametros:  categorias    - arreglo de categorias a guardar (entrada)
+ *              numCategorias - cuantas categorias hay en el arreglo
+ * Retorno:     1 si se guardo bien, 0 si no se pudo abrir el archivo.
+ */
+int guardarCategorias(const Categoria categorias[], int numCategorias) {
+    FILE *archivo = NULL;
+    int i = 0;
+
+    archivo = fopen(ARCHIVO_CATEGORIAS, "w");
+    if (archivo == NULL) {
+        return 0;
+    }
+
+    for (i = 0; i < numCategorias; i++) {
+        fprintf(archivo, "%d|%s\n", categorias[i].id, categorias[i].nombre);
+    }
+
+    fclose(archivo);
+    return 1;
+}
+
+/*
+ * Funcion:     cargarCategorias
+ * Descripcion: Lee las categorias de ARCHIVO_CATEGORIAS. Las lineas
+ *              danadas se ignoran. Lee como maximo MAX_CATEGORIAS.
+ * Parametros:  categorias    - arreglo donde se guardan (salida)
+ *              numCategorias - cuantas categorias se leyeron (salida)
+ * Retorno:     1 si se pudo abrir el archivo, 0 si no (y *numCategorias
+ *              en 0).
+ */
+int cargarCategorias(Categoria categorias[], int *numCategorias) {
+    FILE *archivo = NULL;
+    char linea[100];
+    Categoria leido;
+    int campos = 0;
+
+    *numCategorias = 0;
+
+    archivo = fopen(ARCHIVO_CATEGORIAS, "r");
+    if (archivo == NULL) {
+        return 0;
+    }
+
+    while (fgets(linea, sizeof(linea), archivo) != NULL &&
+           *numCategorias < MAX_CATEGORIAS) {
+        /* El ancho 30 debe coincidir con LONG_NOMBRE */
+        campos = sscanf(linea, "%d|%30[^\n]", &leido.id, leido.nombre);
+        if (campos == 2) {
+            categorias[*numCategorias] = leido;
+            (*numCategorias)++;
+        }
+    }
+
+    fclose(archivo);
+    return 1;
+}
+
+/*
+ * Funcion:     guardarGastos
+ * Descripcion: Escribe todos los gastos en ARCHIVO_GASTOS, uno por linea
+ *              con el formato id|idGrupo|idPagador|idCategoria|
+ *              descripcion|montoCentavos|fecha|tipoDivision.
+ * Parametros:  gastos    - arreglo de gastos a guardar (entrada)
+ *              numGastos - cuantos gastos hay en el arreglo
+ * Retorno:     1 si se guardo bien, 0 si no se pudo abrir el archivo.
+ */
+int guardarGastos(const Gasto gastos[], int numGastos) {
+    FILE *archivo = NULL;
+    int i = 0;
+
+    archivo = fopen(ARCHIVO_GASTOS, "w");
+    if (archivo == NULL) {
+        return 0;
+    }
+
+    for (i = 0; i < numGastos; i++) {
+        fprintf(archivo, "%d|%d|%d|%d|%s|%ld|%d|%d\n", gastos[i].id,
+                gastos[i].idGrupo, gastos[i].idPagador, gastos[i].idCategoria,
+                gastos[i].descripcion, gastos[i].montoCentavos, gastos[i].fecha,
+                (int)gastos[i].tipoDivision);
+    }
+
+    fclose(archivo);
+    return 1;
+}
+
+/*
+ * Funcion:     cargarGastos
+ * Descripcion: Lee los gastos de ARCHIVO_GASTOS. Las lineas danadas se
+ *              ignoran. Lee como maximo MAX_GASTOS.
+ * Parametros:  gastos    - arreglo donde se guardan (salida)
+ *              numGastos - cuantos gastos se leyeron (salida)
+ * Retorno:     1 si se pudo abrir el archivo, 0 si no (y *numGastos en 0).
+ */
+int cargarGastos(Gasto gastos[], int *numGastos) {
+    FILE *archivo = NULL;
+    char linea[200];
+    Gasto leido;
+    int tipo = 0; /* temporal para leer el enum tipoDivision */
+    int campos = 0;
+
+    *numGastos = 0;
+
+    archivo = fopen(ARCHIVO_GASTOS, "r");
+    if (archivo == NULL) {
+        return 0;
+    }
+
+    while (fgets(linea, sizeof(linea), archivo) != NULL &&
+           *numGastos < MAX_GASTOS) {
+        /* El ancho 50 debe coincidir con LONG_DESCRIPCION */
+        campos = sscanf(linea, "%d|%d|%d|%d|%50[^|]|%ld|%d|%d", &leido.id,
+                        &leido.idGrupo, &leido.idPagador, &leido.idCategoria,
+                        leido.descripcion, &leido.montoCentavos, &leido.fecha,
+                        &tipo);
+        if (campos == 8) {
+            leido.tipoDivision = (TipoDivision)tipo;
+            gastos[*numGastos] = leido;
+            (*numGastos)++;
+        }
+    }
+
+    fclose(archivo);
+    return 1;
+}
+
+/*
+ * Funcion:     guardarDivisiones
+ * Descripcion: Escribe todas las divisiones en ARCHIVO_DIVISIONES, una
+ *              por linea con el formato idGasto|idUsuario|montoCentavos.
+ * Parametros:  divisiones    - arreglo de divisiones a guardar (entrada)
+ *              numDivisiones - cuantas divisiones hay en el arreglo
+ * Retorno:     1 si se guardo bien, 0 si no se pudo abrir el archivo.
+ */
+int guardarDivisiones(const DivisionGasto divisiones[], int numDivisiones) {
+    FILE *archivo = NULL;
+    int i = 0;
+
+    archivo = fopen(ARCHIVO_DIVISIONES, "w");
+    if (archivo == NULL) {
+        return 0;
+    }
+
+    for (i = 0; i < numDivisiones; i++) {
+        fprintf(archivo, "%d|%d|%ld\n", divisiones[i].idGasto,
+                divisiones[i].idUsuario, divisiones[i].montoCentavos);
+    }
+
+    fclose(archivo);
+    return 1;
+}
+
+/*
+ * Funcion:     cargarDivisiones
+ * Descripcion: Lee las divisiones de ARCHIVO_DIVISIONES. Las lineas
+ *              danadas se ignoran. Lee como maximo MAX_DIVISIONES.
+ * Parametros:  divisiones    - arreglo donde se guardan (salida)
+ *              numDivisiones - cuantas divisiones se leyeron (salida)
+ * Retorno:     1 si se pudo abrir el archivo, 0 si no (y *numDivisiones
+ *              en 0).
+ */
+int cargarDivisiones(DivisionGasto divisiones[], int *numDivisiones) {
+    FILE *archivo = NULL;
+    char linea[100];
+    DivisionGasto leido;
+    int campos = 0;
+
+    *numDivisiones = 0;
+
+    archivo = fopen(ARCHIVO_DIVISIONES, "r");
+    if (archivo == NULL) {
+        return 0;
+    }
+
+    while (fgets(linea, sizeof(linea), archivo) != NULL &&
+           *numDivisiones < MAX_DIVISIONES) {
+        campos = sscanf(linea, "%d|%d|%ld", &leido.idGasto, &leido.idUsuario,
+                        &leido.montoCentavos);
+        if (campos == 3) {
+            divisiones[*numDivisiones] = leido;
+            (*numDivisiones)++;
+        }
+    }
+
+    fclose(archivo);
+    return 1;
+}
+
+/*
+ * Funcion:     guardarLiquidaciones
+ * Descripcion: Escribe todas las liquidaciones en ARCHIVO_LIQUIDACIONES,
+ *              una por linea con el formato id|idGrupo|idDeudor|
+ *              idAcreedor|montoCentavos|fecha.
+ * Parametros:  liquidaciones    - arreglo de liquidaciones (entrada)
+ *              numLiquidaciones - cuantas liquidaciones hay en el arreglo
+ * Retorno:     1 si se guardo bien, 0 si no se pudo abrir el archivo.
+ */
+int guardarLiquidaciones(const Liquidacion liquidaciones[],
+                         int numLiquidaciones) {
+    FILE *archivo = NULL;
+    int i = 0;
+
+    archivo = fopen(ARCHIVO_LIQUIDACIONES, "w");
+    if (archivo == NULL) {
+        return 0;
+    }
+
+    for (i = 0; i < numLiquidaciones; i++) {
+        fprintf(archivo, "%d|%d|%d|%d|%ld|%d\n", liquidaciones[i].id,
+                liquidaciones[i].idGrupo, liquidaciones[i].idDeudor,
+                liquidaciones[i].idAcreedor, liquidaciones[i].montoCentavos,
+                liquidaciones[i].fecha);
+    }
+
+    fclose(archivo);
+    return 1;
+}
+
+/*
+ * Funcion:     cargarLiquidaciones
+ * Descripcion: Lee las liquidaciones de ARCHIVO_LIQUIDACIONES. Las lineas
+ *              danadas se ignoran. Lee como maximo MAX_LIQUIDACIONES.
+ * Parametros:  liquidaciones    - arreglo donde se guardan (salida)
+ *              numLiquidaciones - cuantas se leyeron (salida)
+ * Retorno:     1 si se pudo abrir el archivo, 0 si no (y
+ *              *numLiquidaciones en 0).
+ */
+int cargarLiquidaciones(Liquidacion liquidaciones[], int *numLiquidaciones) {
+    FILE *archivo = NULL;
+    char linea[100];
+    Liquidacion leido;
+    int campos = 0;
+
+    *numLiquidaciones = 0;
+
+    archivo = fopen(ARCHIVO_LIQUIDACIONES, "r");
+    if (archivo == NULL) {
+        return 0;
+    }
+
+    while (fgets(linea, sizeof(linea), archivo) != NULL &&
+           *numLiquidaciones < MAX_LIQUIDACIONES) {
+        campos = sscanf(linea, "%d|%d|%d|%d|%ld|%d", &leido.id,
+                        &leido.idGrupo, &leido.idDeudor, &leido.idAcreedor,
+                        &leido.montoCentavos, &leido.fecha);
+        if (campos == 6) {
+            liquidaciones[*numLiquidaciones] = leido;
+            (*numLiquidaciones)++;
+        }
+    }
+
+    fclose(archivo);
+    return 1;
+}
