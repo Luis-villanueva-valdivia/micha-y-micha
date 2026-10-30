@@ -121,3 +121,41 @@ long leerMonto(void) {
 
     return (long)(pesos * 100 + 0.5); /* Convertir a centavos */
 }
+
+/*
+ * Funcion:     leerFecha
+ * Descripcion: Lee una fecha con formato dd/mm/aaaa y la vuelve a pedir
+ *              mientras el formato sea incorrecto o la fecha no exista
+ *              (considera meses de 30 y 31 dias y anios bisiestos).
+ * Parametros:  Ninguno.
+ * Retorno:     La fecha como entero AAAAMMDD (por ejemplo 20261030).
+ */
+int leerFecha(void) {
+    int diasPorMes[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+    int dia = 0;
+    int mes = 0;
+    int anio = 0;
+    int leidos = 0;
+    int bisiesto = 0;
+    int maxDias = 0;
+    int valido = 0;
+
+    do {
+        leidos = scanf("%d/%d/%d", &dia, &mes, &anio);
+        limpiarBuffer();
+        valido = (leidos == 3) && (mes >= 1 && mes <= 12) && (anio >= 2000);
+        if (valido) {
+            bisiesto = anio % 4 == 0 && (anio % 100 != 0 || anio % 400 == 0);
+            maxDias = diasPorMes[mes-1];
+            if (mes == 2 && bisiesto) {
+                maxDias = 29;
+            }
+            valido = (dia >= 1 && dia <= maxDias);
+        }
+        if (!valido) {
+            printf("Error: Ingrese una fecha valida (dd/mm/aaaa): ");
+        }
+    } while (!valido);
+
+    return anio * 10000 + mes * 100 + dia;
+}
