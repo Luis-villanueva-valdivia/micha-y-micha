@@ -24,6 +24,7 @@ void limpiarBuffer(void) {
         /* Solo se descarta el caracter */
     }
 }
+
 /*
  * Funcion:     leerEntero
  * Descripcion: Lee un entero del teclado y lo vuelve a pedir mientras no
@@ -36,16 +37,32 @@ void limpiarBuffer(void) {
 int leerEntero(int minimo, int maximo) {
     int numero = 0;
     int leidos = 0;
-    int valido =0;
+    int valido = 0;
 
-    do{
-        leidos=scanf("%d", &numero);
+    do {
+        leidos = scanf("%d", &numero);
         limpiarBuffer();
-        valido =(leidos==1) && (numero>=minimo && numero<=maximo);
-        if(!valido){
+        valido = (leidos == 1) && (numero >= minimo && numero <= maximo);
+        if (!valido) {
             printf("Error: Ingrese un numero entre %d y %d: ", minimo, maximo);
         }
-    } while(!valido);
+    } while (!valido);
 
     return numero;
+}
+
+/*
+ * Funcion:     mostrarMonto
+ * Descripcion: Imprime un monto en centavos con formato de pesos y dos
+ *              decimales, por ejemplo 84050 como $840.50. Los negativos
+ *              se muestran como -$1.50. No imprime salto de linea.
+ * Parametros:  montoCentavos - monto a mostrar, en centavos
+ * Retorno:     Ninguno.
+ */
+void mostrarMonto(long montoCentavos) {
+    if (montoCentavos < 0) {
+        printf("-");
+        montoCentavos = -montoCentavos;
+    }
+    printf("$%ld.%02ld", montoCentavos / 100, montoCentavos % 100);
 }
