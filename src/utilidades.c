@@ -8,6 +8,7 @@
  *              formato de montos en pesos (RNF-02, RNF-03).
  */
 #include <stdio.h>
+#include <string.h>
 #include "utilidades.h"
 
 /*
@@ -65,4 +66,33 @@ void mostrarMonto(long montoCentavos) {
         montoCentavos = -montoCentavos;
     }
     printf("$%ld.%02ld", montoCentavos / 100, montoCentavos % 100);
+}
+
+/*
+ * Funcion:     leerTexto
+ * Descripcion: Lee una linea de texto no vacia con fgets, sin desbordar
+ *              el arreglo, y le quita el salto de linea final. Si el
+ *              texto excede la capacidad, se trunca y se descarta el
+ *              resto de la linea.
+ * Parametros:  destino   - arreglo donde se guarda el texto
+ *              capacidad - tamano del arreglo destino (incluye el '\0')
+ * Retorno:     Ninguno.
+ * Precondic.:  capacidad >= 2.
+ */
+void leerTexto(char *destino, int capacidad) {
+    int longitud = 0;
+
+    do {
+        fgets(destino, capacidad, stdin);
+        longitud = strlen(destino);
+        if (longitud > 0 && destino[longitud - 1] == '\n') {
+            destino[longitud - 1] = '\0';
+            longitud--;
+        } else {
+            limpiarBuffer();
+        }
+        if (longitud == 0) {
+            printf("Error: El texto no puede estar vacio: ");
+        }
+    } while (longitud == 0);
 }
