@@ -11,6 +11,7 @@
 #ifndef MICHAYMICHA_ARCHIVOS_H
 #define MICHAYMICHA_ARCHIVOS_H
 
+
 #include "estructuras.h"
 
 /* Rutas de los archivos de datos (un archivo por estructura) */
@@ -74,5 +75,10 @@ int guardarLiquidaciones(const Liquidacion liquidaciones[],
 /* Carga las liquidaciones de ARCHIVO_LIQUIDACIONES y deja en
    *numLiquidaciones cuantas leyo. Devuelve 1 si pudo, 0 si no. */
 int cargarLiquidaciones(Liquidacion liquidaciones[], int *numLiquidaciones);
+
+/* Llena el arreglo con las categorias predeterminadas (Renta, Servicios,
+   Super, Limpieza, Otros) y las guarda en ARCHIVO_CATEGORIAS. Devuelve 1
+   si pudo guardarlas, 0 si no. */
+int crearCategoriasPredeterminadas(Categoria categorias[], int *numCategorias);
 
 #endif /* MICHAYMICHA_ARCHIVOS_H */
