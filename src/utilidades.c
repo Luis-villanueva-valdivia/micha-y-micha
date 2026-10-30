@@ -96,3 +96,28 @@ void leerTexto(char *destino, int capacidad) {
         }
     } while (longitud == 0);
 }
+
+/*
+ * Funcion:     leerMonto
+ * Descripcion: Lee un monto en pesos con hasta dos decimales (por ejemplo
+ *              840.50) y lo vuelve a pedir mientras no sea un numero o no
+ *              sea mayor que cero. Lo convierte a centavos redondeando.
+ * Parametros:  Ninguno.
+ * Retorno:     El monto en centavos (por ejemplo 84050).
+ */
+long leerMonto(void) {
+    double pesos = 0;
+    int leidos = 0;
+    int valido = 0;
+
+    do {
+        leidos = scanf("%lf", &pesos);
+        limpiarBuffer();
+        valido = (leidos == 1) && (pesos > 0);
+        if (!valido) {
+            printf("Error: Ingrese un monto mayor que 0: ");
+        }
+    } while (!valido);
+
+    return (long)(pesos * 100 + 0.5); /* Convertir a centavos */
+}
