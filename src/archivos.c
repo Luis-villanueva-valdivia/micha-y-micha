@@ -36,3 +36,42 @@ int guardarUsuarios(const Usuario usuarios[], int numUsuarios) {
     fclose(archivo);
     return 1;
 }
+
+/*
+ * Funcion:     cargarUsuarios
+ * Descripcion: Lee los usuarios de ARCHIVO_USUARIOS (una linea por
+ *              usuario, campos separados por '|') y los guarda en el
+ *              arreglo. Las lineas danadas se ignoran. Lee como maximo
+ *              MAX_USUARIOS.
+ * Parametros:  usuarios    - arreglo donde se guardan (salida)
+ *              numUsuarios - cuantos usuarios se leyeron (salida)
+ * Retorno:     1 si se pudo abrir el archivo, 0 si no existe o no se
+ *              pudo abrir (en ese caso *numUsuarios queda en 0).
+ */
+int cargarUsuarios(Usuario usuarios[], int *numUsuarios) {
+    FILE *archivo = NULL;
+    char linea[100];
+    Usuario leido;
+    int campos = 0;
+
+    *numUsuarios = 0;
+
+    archivo = fopen(ARCHIVO_USUARIOS, "r");
+    if (archivo == NULL) {
+        return 0;
+    }
+
+    while (fgets(linea, sizeof(linea), archivo) != NULL && 
+           *numUsuarios < MAX_USUARIOS) {
+         /* Los anchos 30 y 4 deben coincidir con LONG_NOMBRE y LONG_PIN */
+        campos = sscanf(linea, "%d|%30[^|]|%4[^|]|%d", &leido.id, leido.nombre,
+                        leido.pin, &leido.esAdministrador);
+        if (campos == 4) {
+            usuarios[*numUsuarios] = leido;
+            (*numUsuarios)++;
+        }
+    }
+
+    fclose(archivo);
+    return 1;
+}
