@@ -12,6 +12,7 @@
 #include <ctype.h>
 #include "usuarios.h"
 #include "utilidades.h"
+#define MAX_INTENTOS_PIN 3 /* Intentos de PIN antes de regresar a la lista (E2) */
 
 /*
  * Funcion:     esPinValido
@@ -102,4 +103,49 @@ int registrarUsuario(Usuario usuarios[], int *numUsuarios) {
 
     printf("Usuario registrado.\n");
     return 1;
+}
+
+/*
+ * Funcion:     iniciarSesion
+ * Descripcion: Muestra la lista de usuarios para elegir uno y pide su PIN.
+ *              Tras MAX_INTENTOS_PIN intentos fallidos regresa a la lista
+ *              (E2). La opcion 0 regresa sin iniciar sesion.
+ * Parametros:  usuarios    - arreglo de usuarios
+ *              numUsuarios - cuantos usuarios hay en el arreglo
+ * Retorno:     La posicion del usuario en el arreglo, o -1 si no entro.
+ */
+int iniciarSesion(const Usuario usuarios[], int numUsuarios) {
+    char pinLeido[LONG_PIN + 2];
+    int opcion = 0;
+    int posicion = 0;
+    int intentos = 0;
+
+    if (numUsuarios == 0) {
+        printf("No hay usuarios registrados.\n");
+        return -1;
+    }
+
+    do {
+        printf("\n--- Iniciar sesion ---\n");
+        listarUsuarios(usuarios, numUsuarios);
+        printf("0. Regresar\n");
+        printf("Elige tu usuario: ");
+        opcion = leerEntero(0, numUsuarios);
+
+        if (opcion == 0) {
+            return -1;
+        }
+        posicion = opcion - 1; /* Convertir a indice de arreglo */
+
+        for (intentos = 1; intentos <= MAX_INTENTOS_PIN; intentos++) {
+            printf("PIN: ");
+            leerTexto(pinLeido, LONG_PIN + 2);
+            if (strcmp(pinLeido, usuarios[posicion].pin) == 0) {
+                printf("Bienvenido, %s.\n", usuarios[posicion].nombre);
+                return posicion;
+            }
+            printf("PIN incorrecto. Te quedan %d intentos.\n", MAX_INTENTOS_PIN - intentos);
+        }
+        printf("Demasiados intentos. Regresando a la lista.\n");
+    } while (1);
 }
