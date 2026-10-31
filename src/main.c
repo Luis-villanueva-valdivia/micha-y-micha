@@ -108,6 +108,7 @@ int main(void) {
     /* Inicio de sesion (RF-02). Si elige 0, sale del programa. */
     usuarioActivo = iniciarSesion(usuarios, numUsuarios);
     if (usuarioActivo == -1) {
+        guardarUsuarios(usuarios, numUsuarios);
         printf("Hasta luego.\n");
         return 0;
     }
@@ -128,7 +129,29 @@ int main(void) {
                 printf("Disponible en un proximo incremento.\n");
                 break;
             case 0:
-                /* Aqui va el guardado (paso 4) */
+                                /* Guardado de datos al salir (RF-16) */
+                if (!guardarUsuarios(usuarios, numUsuarios)) {
+                    printf("Error: no se pudieron guardar los usuarios.\n");
+                }
+                if (!guardarGrupos(grupos, numGrupos)) {
+                    printf("Error: no se pudieron guardar los grupos.\n");
+                }
+                if (!guardarMiembros(miembros, numMiembros)) {
+                    printf("Error: no se pudieron guardar los miembros.\n");
+                }
+                if (!guardarCategorias(categorias, numCategorias)) {
+                    printf("Error: no se pudieron guardar las categorias.\n");
+                }
+                if (!guardarGastos(gastos, numGastos)) {
+                    printf("Error: no se pudieron guardar los gastos.\n");
+                }
+                if (!guardarDivisiones(divisiones, numDivisiones)) {
+                    printf("Error: no se pudieron guardar las divisiones.\n");
+                }
+                if (!guardarLiquidaciones(liquidaciones, numLiquidaciones)) {
+                    printf("Error: no se pudieron guardar las liquidaciones.\n");
+                }
+                printf("Datos guardados. Hasta luego.\n");
                 break;
         }
     } while (opcion != 0);
