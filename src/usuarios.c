@@ -32,3 +32,23 @@ void listarUsuarios(const Usuario usuarios[], int numUsuarios) {
         printf("\n");
     }
 }
+/*
+ * Funcion:     esPinValido
+ * Descripcion: Revisa que el texto tenga exactamente LONG_PIN caracteres
+ *              y que todos sean digitos del 0 al 9.
+ * Parametros:  pin - texto a revisar
+ * Retorno:     1 si es valido, 0 si no.
+ */
+static int esPinValido(const char *pin) {
+    int i = 0;
+
+    if (strlen(pin) != LONG_PIN) {
+        return 0;
+    }
+    for (i = 0; i < LONG_PIN; i++) {
+        if (!isdigit(pin[i])) {
+            return 0;
+        }
+    }
+    return 1;
+}
