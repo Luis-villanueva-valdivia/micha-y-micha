@@ -14,6 +14,27 @@
 #include "utilidades.h"
 
 /*
+ * Funcion:     esPinValido
+ * Descripcion: Revisa que el texto tenga exactamente LONG_PIN caracteres
+ *              y que todos sean digitos del 0 al 9.
+ * Parametros:  pin - texto a revisar
+ * Retorno:     1 si es valido, 0 si no.
+ */
+static int esPinValido(const char *pin) {
+    int i = 0;
+
+    if (strlen(pin) != LONG_PIN) {
+        return 0;
+    }
+    for (i = 0; i < LONG_PIN; i++) {
+        if (!isdigit(pin[i])) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+/*
  * Funcion:     listarUsuarios
  * Descripcion: Muestra cada usuario con un numero para elegirlo (1, 2,
  *              3...) y su nombre. Marca al Administrador. Nunca muestra
@@ -35,22 +56,50 @@ void listarUsuarios(const Usuario usuarios[], int numUsuarios) {
 }
 
 /*
- * Funcion:     esPinValido
- * Descripcion: Revisa que el texto tenga exactamente LONG_PIN caracteres
- *              y que todos sean digitos del 0 al 9.
- * Parametros:  pin - texto a revisar
- * Retorno:     1 si es valido, 0 si no.
+ * Funcion:     registrarUsuario
+ * Descripcion: Pide el nombre y el PIN de un usuario nuevo y lo agrega al
+ *              arreglo. No permite nombres repetidos. Si es el primer
+ *              usuario del sistema, queda como Administrador (E3).
+ * Parametros:  usuarios    - arreglo de usuarios
+ *              numUsuarios - apuntador al contador de usuarios; aumenta en
+ *                            1 si se agrega
+ * Retorno:     1 si se registro, 0 si no (lleno o nombre repetido).
  */
-static int esPinValido(const char *pin) {
+int registrarUsuario(Usuario usuarios[], int *numUsuarios) {
+    Usuario nuevo;
+    char pinLeido[LONG_PIN + 2]; /* Un lugar extra para detectar PIN largos */
     int i = 0;
 
-    if (strlen(pin) != LONG_PIN) {
+    if (*numUsuarios >= MAX_USUARIOS) {
+        printf("Error: Ya no caben mas usuarios.\n");
         return 0;
     }
-    for (i = 0; i < LONG_PIN; i++) {
-        if (!isdigit(pin[i])) {
+
+    printf("Nombre: ");
+    leerTexto(nuevo.nombre, LONG_NOMBRE + 1);
+
+    for (i = 0; i < *numUsuarios; i++) {
+        if (strcmp(usuarios[i].nombre, nuevo.nombre) == 0) {
+            printf("Error: Ya existe un usuario con ese nombre.\n");
             return 0;
         }
     }
+
+    do {
+        printf("PIN de %d digitos: ", LONG_PIN);
+        leerTexto(pinLeido, LONG_PIN + 2); /* +1 para '\0', +1 para detectar PIN largos */
+        if (!esPinValido(pinLeido)) {
+            printf("Error: El PIN debe tener exactamente %d digitos.\n", LONG_PIN);
+        }
+    } while (!esPinValido(pinLeido));
+
+    strcpy(nuevo.pin, pinLeido);
+    nuevo.id=(*numUsuarios + 1); /* id unico, empieza en 1 */
+    nuevo.esAdministrador = (*numUsuarios == 0) ? 1 : 0; /* Primer usuario es admin */
+
+    usuarios[*numUsuarios] = nuevo;
+    (*numUsuarios)++;
+
+    printf("Usuario registrado.\n");
     return 1;
 }
