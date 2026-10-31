@@ -10,6 +10,8 @@
 #include <stdio.h>
 #include "estructuras.h"
 #include "archivos.h"
+#include "usuarios.h"
+#include "utilidades.h"
 
 int main(void) {
     /* Datos del sistema: un arreglo y un contador por estructura */
@@ -27,6 +29,7 @@ int main(void) {
     int numDivisiones = 0;
     Liquidacion liquidaciones[MAX_LIQUIDACIONES];
     int numLiquidaciones = 0;
+    int usuarioActivo = -1; /* -1 significa que no hay usuario logueado */
 
     printf("Micha y Micha\n");
 
@@ -55,6 +58,19 @@ int main(void) {
     if (!cargarCategorias(categorias, &numCategorias)) {
         printf("Aviso: se crearon las categorias predeterminadas.\n");
         crearCategoriasPredeterminadas(categorias, &numCategorias);
+    }
+
+        /* Si no hay nadie, el primero que se registra es el Administrador (E3) */
+    if (numUsuarios == 0) {
+        printf("\nNo hay usuarios. Registra al Administrador.\n");
+        registrarUsuario(usuarios, &numUsuarios);
+    }
+
+    /* Inicio de sesion (RF-02). Si elige 0, sale del programa. */
+    usuarioActivo = iniciarSesion(usuarios, numUsuarios);
+    if (usuarioActivo == -1) {
+        printf("Hasta luego.\n");
+        return 0;
     }
 
     return 0;
