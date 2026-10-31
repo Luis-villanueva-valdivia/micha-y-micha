@@ -8,6 +8,7 @@
  *              de texto con campos separados por '|' (RF-16, RF-17).
  */
 #include <stdio.h>
+#include <string.h>
 #include "archivos.h"
 
 /*
@@ -454,4 +455,28 @@ int cargarLiquidaciones(Liquidacion liquidaciones[], int *numLiquidaciones) {
 
     fclose(archivo);
     return 1;
+}
+
+/*
+ * Funcion:     crearCategoriasPredeterminadas
+ * Descripcion: Llena el arreglo con las cinco categorias predeterminadas
+ *              (Renta, Servicios, Super, Limpieza, Otros) con ids del 1 al
+ *              5 y las guarda en ARCHIVO_CATEGORIAS. Se usa cuando el
+ *              archivo de categorias no existe.
+ * Parametros:  categorias    - arreglo donde se crean (salida)
+ *              numCategorias - cuantas categorias quedaron (salida)
+ * Retorno:     1 si se guardaron bien, 0 si no se pudo escribir el archivo.
+ */
+int crearCategoriasPredeterminadas(Categoria categorias[],int *numCategorias) {
+    const char *nombres[] = {"Renta", "Servicios", "Super", "Limpieza", "Otros"};
+    int totalNombres = 5;
+    int i = 0;
+
+    for (i = 0; i < totalNombres; i++) {
+        categorias[i].id = i + 1;
+        strcpy(categorias[i].nombre, nombres[i]);
+    }
+    *numCategorias = totalNombres;
+
+    return guardarCategorias(categorias, *numCategorias);
 }
