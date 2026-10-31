@@ -9,6 +9,7 @@
  */
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 #include "usuarios.h"
 #include "utilidades.h"
 
@@ -25,13 +26,14 @@ void listarUsuarios(const Usuario usuarios[], int numUsuarios) {
     int i = 0;
 
     for (i = 0; i < numUsuarios; i++) {
-        printf("%d. %s", i+1, usuarios[i].nombre);
+        printf("%d. %s", i + 1, usuarios[i].nombre);
         if (usuarios[i].esAdministrador) {
             printf(" (Administrador)");
         }
         printf("\n");
     }
 }
+
 /*
  * Funcion:     esPinValido
  * Descripcion: Revisa que el texto tenga exactamente LONG_PIN caracteres
