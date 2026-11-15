@@ -55,7 +55,8 @@ static void mostrarMenuPrincipal(const Usuario usuarios[], int usuarioActivo,
 /*
  * Funcion:     menuGrupos
  * Descripcion: Submenu para crear, renombrar y eliminar grupos (RF-03).
- *              Al crear un grupo, el Administrador queda como miembro.
+ *              Al crear un grupo, el Administrador queda como miembro
+ *              y, si no habia grupo activo, el nuevo pasa a ser el activo.
  *              Si se elimina el grupo activo, ya no queda grupo activo.
  * Parametros:  grupos        - arreglo de grupos
  *              numGrupos     - apuntador al contador de grupos
@@ -89,6 +90,10 @@ static void menuGrupos(Grupo grupos[], int *numGrupos,
                     miembros[*numMiembros].idGrupo = grupos[*numGrupos - 1].id;
                     miembros[*numMiembros].idUsuario = idUsuario;
                     (*numMiembros)++;
+                    /* Si no habia grupo activo, el nuevo queda como activo */
+                    if (*idGrupoActivo == 0) {
+                        *idGrupoActivo = grupos[*numGrupos - 1].id;
+                    }
                 }
                 break;
             case 2:
