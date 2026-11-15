@@ -126,3 +126,92 @@ int agregarCategoria(Categoria categorias[], int *numCategorias) {
     printf("Categoria \"%s\" agregada.\n", nueva.nombre);
     return 1;
 }
+
+/*
+ * Funcion:     elegirCategoria
+ * Descripcion: Muestra la lista de categorias y pide elegir una. La
+ *              opcion 0 cancela.
+ * Parametros:  categorias    - arreglo de categorias
+ *              numCategorias - cuantas categorias hay en el arreglo
+ * Retorno:     La posicion elegida, o -1 si se cancelo o no hay.
+ */
+static int elegirCategoria(const Categoria categorias[], int numCategorias) {
+    int opcion = 0;
+
+    if (numCategorias == 0) {
+        printf("No hay categorias registradas.\n");
+        return -1;
+    }
+    listarCategorias(categorias, numCategorias);
+    printf("0. Cancelar\n");
+    printf("Elige la categoria: ");
+    opcion = leerEntero(0, numCategorias);
+    return opcion - 1; /* 0 se convierte en -1 (cancelar) */
+}
+
+/*
+ * Funcion:     renombrarCategoria
+ * Descripcion: Pide elegir una categoria y le cambia el nombre. Rechaza
+ *              nombres repetidos (E1).
+ * Parametros:  categorias    - arreglo de categorias
+ *              numCategorias - cuantas categorias hay en el arreglo
+ * Retorno:     1 si se renombro, 0 si no.
+ */
+int renombrarCategoria(Categoria categorias[], int numCategorias) {
+    char nombre[LONG_NOMBRE + 1];
+    int posicion = 0;
+
+    posicion = elegirCategoria(categorias, numCategorias);
+    if (posicion == -1) {
+        return 0;
+    }
+
+    printf("Nuevo nombre: ");
+    leerTexto(nombre, LONG_NOMBRE + 1);
+
+    if (existeNombreCategoria(categorias, numCategorias, nombre, posicion)) {
+        printf("Error: Ya existe una categoria con ese nombre.\n");
+        return 0;
+    }
+
+    strcpy(categorias[posicion].nombre, nombre);
+    printf("Categoria renombrada.\n");
+    return 1;
+}
+
+/*
+ * Funcion:     eliminarCategoria
+ * Descripcion: Pide elegir una categoria y la elimina, siempre que ningun
+ *              gasto la use (E2). Las siguientes se recorren una posicion.
+ * Parametros:  categorias    - arreglo de categorias
+ *              numCategorias - apuntador al contador de categorias
+ *              gastos        - arreglo de gastos, para revisar su uso
+ *              numGastos     - cuantos gastos hay en el arreglo
+ * Retorno:     1 si se elimino, 0 si no.
+ */
+int eliminarCategoria(Categoria categorias[], int *numCategorias,
+                      const Gasto gastos[], int numGastos) {
+    int posicion = 0;
+    int i = 0;
+
+    posicion = elegirCategoria(categorias, *numCategorias);
+    if (posicion == -1) {
+        return 0;
+    }
+
+    for (i = 0; i < numGastos; i++) {
+        if (gastos[i].idCategoria == categorias[posicion].id) {
+            printf("Error: La categoria tiene gastos asociados; no se puede "
+                   "eliminar.\n");
+            return 0;
+        }
+    }
+
+    for (i = posicion; i < *numCategorias - 1; i++) {
+        categorias[i] = categorias[i + 1];
+    }
+    (*numCategorias)--;
+
+    printf("Categoria eliminada.\n");
+    return 1;
+}
