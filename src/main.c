@@ -13,6 +13,7 @@
 #include "categorias.h"
 #include "gastos.h"
 #include "grupos.h"
+#include "saldos.h"
 #include "usuarios.h"
 #include "utilidades.h"
 
@@ -431,9 +432,20 @@ int main(void) {
                            idGrupoActivo);
                 break;
             case 2:
+                if (idGrupoActivo == 0) {
+                    printf("Primero elige un grupo activo (opcion 6).\n");
+                } else {
+                    mostrarSaldos(idGrupoActivo, usuarios, numUsuarios,
+                                  miembros, numMiembros, gastos, numGastos,
+                                  divisiones, numDivisiones, liquidaciones,
+                                  numLiquidaciones);
+                }
+                break;
             case 3:
             case 4:
             case 5:
+                printf("Disponible en un proximo incremento.\n");
+                break;
             case 6:
                 idElegido = cambiarGrupoActivo(grupos, numGrupos, miembros,
                                                numMiembros,
