@@ -365,6 +365,9 @@ int main(void) {
     int idGrupoActivo = 0; /* id del grupo activo; 0 si no hay */
     int opcion = 0;       /* Opcion elegida en el menu principal */
     int idElegido = 0;    /* Grupo elegido en la opcion 6 */
+    int gruposConSaldo[MAX_GRUPOS]; /* Grupos que no se pueden eliminar */
+    int idsConSaldo[MAX_MIEMBROS];  /* Miembros que no se pueden quitar */
+    int numBloqueados = 0;
     int i = 0;
 
     printf("Micha y Micha\n");
@@ -455,6 +458,27 @@ int main(void) {
                 }
                 break;
             case 7:
+                /* Grupos y miembros con saldo pendiente no se pueden
+                   eliminar ni quitar (E2 de CU-09 y CU-10) */
+                numBloqueados = 0;
+                for (i = 0; i < numGrupos; i++) {
+                    if (usuariosConSaldo(grupos[i].id, miembros, numMiembros,
+                                         gastos, numGastos, divisiones,
+                                         numDivisiones, liquidaciones,
+                                         numLiquidaciones, idsConSaldo) > 0) {
+                        gruposConSaldo[numBloqueados] = grupos[i].id;
+                        numBloqueados++;
+                    }
+                }
+                fijarBloqueosSaldo(gruposConSaldo, numBloqueados, idGrupoActivo,
+                                   idsConSaldo,
+                                   usuariosConSaldo(idGrupoActivo, miembros,
+                                                    numMiembros, gastos,
+                                                    numGastos, divisiones,
+                                                    numDivisiones,
+                                                    liquidaciones,
+                                                    numLiquidaciones,
+                                                    idsConSaldo));
                 menuAdministracion(usuarios, &numUsuarios, grupos, &numGrupos,
                                    miembros, &numMiembros, categorias,
                                    &numCategorias, gastos, numGastos,
