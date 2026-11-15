@@ -5,8 +5,9 @@
  * Fecha:       15/11/2026
  * Version:     0.3
  * Descripcion: Registro de gastos compartidos del grupo activo y de sus
- *              participantes (RF-06, CU-02), y su division en partes
- *              iguales o personalizadas (RF-07, RF-08, CU-03).
+ *              participantes (RF-06, CU-02), su division en partes
+ *              iguales o personalizadas (RF-07, RF-08, CU-03) y su
+ *              eliminacion (RF-09).
  */
 #ifndef MICHAYMICHA_GASTOS_H
 #define MICHAYMICHA_GASTOS_H
@@ -35,5 +36,13 @@ int registrarGasto(Gasto gastos[], int *numGastos,
                    const Usuario usuarios[], int numUsuarios,
                    const MiembroGrupo miembros[], int numMiembros,
                    const Categoria categorias[], int numCategorias);
+
+/* Muestra los gastos del grupo, pide elegir uno y lo elimina junto con
+   sus divisiones. Solo puede hacerlo quien lo pago o el Administrador.
+   Devuelve 1 si lo elimino, 0 si no. */
+int eliminarGasto(Gasto gastos[], int *numGastos,
+                  DivisionGasto divisiones[], int *numDivisiones,
+                  int idGrupo, const Usuario *usuario,
+                  const Usuario usuarios[], int numUsuarios);
 
 #endif /* MICHAYMICHA_GASTOS_H */
