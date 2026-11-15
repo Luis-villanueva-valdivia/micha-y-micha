@@ -3,13 +3,15 @@
  * Proyecto:    Micha y Micha
  * Autor:       Luis Adrian Villanueva Valdivia
  * Fecha:       30/10/2026
- * Version:     0.2
+ * Version:     0.3
  * Descripcion: Punto de entrada y menu principal. Cada opcion llama a
  *              una funcion de su modulo; aqui no va logica de negocio.
  */
 #include <stdio.h>
 #include "estructuras.h"
 #include "archivos.h"
+#include "categorias.h"
+#include "grupos.h"
 #include "usuarios.h"
 #include "utilidades.h"
 
@@ -50,6 +52,236 @@ static void mostrarMenuPrincipal(const Usuario usuarios[], int usuarioActivo,
     printf(" Opcion: ");
 }
 
+/*
+ * Funcion:     menuGrupos
+ * Descripcion: Submenu para crear, renombrar y eliminar grupos (RF-03).
+ *              Al crear un grupo, el Administrador queda como miembro.
+ *              Si se elimina el grupo activo, ya no queda grupo activo.
+ * Parametros:  grupos        - arreglo de grupos
+ *              numGrupos     - apuntador al contador de grupos
+ *              miembros      - arreglo de membresias
+ *              numMiembros   - apuntador al contador de membresias
+ *              idUsuario     - id del Administrador que usa el menu
+ *              idGrupoActivo - apuntador al id del grupo activo (0 = ninguno)
+ * Retorno:     Ninguno.
+ */
+static void menuGrupos(Grupo grupos[], int *numGrupos,
+                       MiembroGrupo miembros[], int *numMiembros,
+                       int idUsuario, int *idGrupoActivo) {
+    int opcion = 0;
+    int idEliminado = 0;
+
+    do {
+        printf("\n--- Grupos ---\n");
+        listarGrupos(grupos, *numGrupos);
+        printf("1. Crear grupo\n");
+        printf("2. Renombrar grupo\n");
+        printf("3. Eliminar grupo\n");
+        printf("0. Regresar\n");
+        printf("Opcion: ");
+        opcion = leerEntero(0, 3);
+
+        switch (opcion) {
+            case 1:
+                if (crearGrupo(grupos, numGrupos, idUsuario) &&
+                    *numMiembros < MAX_MEMBRESIAS) {
+                    /* El creador queda como miembro del grupo nuevo */
+                    miembros[*numMiembros].idGrupo = grupos[*numGrupos - 1].id;
+                    miembros[*numMiembros].idUsuario = idUsuario;
+                    (*numMiembros)++;
+                }
+                break;
+            case 2:
+                renombrarGrupo(grupos, *numGrupos);
+                break;
+            case 3:
+                idEliminado = eliminarGrupo(grupos, numGrupos, miembros,
+                                            numMiembros);
+                if (idEliminado != 0 && idEliminado == *idGrupoActivo) {
+                    *idGrupoActivo = 0;
+                }
+                break;
+        }
+    } while (opcion != 0);
+}
+
+/*
+ * Funcion:     menuMiembros
+ * Descripcion: Submenu para ver, agregar y quitar miembros del grupo
+ *              activo (RF-04). Pide tener un grupo activo.
+ * Parametros:  miembros      - arreglo de membresias
+ *              numMiembros   - apuntador al contador de membresias
+ *              usuarios      - arreglo de usuarios
+ *              numUsuarios   - apuntador al contador de usuarios
+ *              idGrupoActivo - id del grupo activo (0 = ninguno)
+ * Retorno:     Ninguno.
+ */
+static void menuMiembros(MiembroGrupo miembros[], int *numMiembros,
+                         Usuario usuarios[], int *numUsuarios,
+                         int idGrupoActivo) {
+    int opcion = 0;
+
+    if (idGrupoActivo == 0) {
+        printf("Primero elige un grupo activo (opcion 6).\n");
+        return;
+    }
+
+    do {
+        printf("\n--- Miembros del grupo ---\n");
+        listarMiembros(miembros, *numMiembros, idGrupoActivo, usuarios,
+                       *numUsuarios);
+        printf("1. Agregar miembro\n");
+        printf("2. Quitar miembro\n");
+        printf("0. Regresar\n");
+        printf("Opcion: ");
+        opcion = leerEntero(0, 2);
+
+        switch (opcion) {
+            case 1:
+                agregarMiembro(miembros, numMiembros, idGrupoActivo, usuarios,
+                               numUsuarios);
+                break;
+            case 2:
+                quitarMiembro(miembros, numMiembros, idGrupoActivo, usuarios,
+                              *numUsuarios);
+                break;
+        }
+    } while (opcion != 0);
+}
+
+/*
+ * Funcion:     menuCategorias
+ * Descripcion: Submenu para agregar, renombrar y eliminar categorias
+ *              (RF-05).
+ * Parametros:  categorias    - arreglo de categorias
+ *              numCategorias - apuntador al contador de categorias
+ *              gastos        - arreglo de gastos (para no borrar usadas)
+ *              numGastos     - cuantos gastos hay
+ * Retorno:     Ninguno.
+ */
+static void menuCategorias(Categoria categorias[], int *numCategorias,
+                           const Gasto gastos[], int numGastos) {
+    int opcion = 0;
+
+    do {
+        printf("\n--- Categorias ---\n");
+        listarCategorias(categorias, *numCategorias);
+        printf("1. Agregar categoria\n");
+        printf("2. Renombrar categoria\n");
+        printf("3. Eliminar categoria\n");
+        printf("0. Regresar\n");
+        printf("Opcion: ");
+        opcion = leerEntero(0, 3);
+
+        switch (opcion) {
+            case 1:
+                agregarCategoria(categorias, numCategorias);
+                break;
+            case 2:
+                renombrarCategoria(categorias, *numCategorias);
+                break;
+            case 3:
+                eliminarCategoria(categorias, numCategorias, gastos, numGastos);
+                break;
+        }
+    } while (opcion != 0);
+}
+
+/*
+ * Funcion:     cambiarGrupoActivo
+ * Descripcion: Muestra los grupos a los que pertenece el usuario (el
+ *              Administrador ve todos) y pide elegir el grupo activo.
+ * Parametros:  grupos      - arreglo de grupos
+ *              numGrupos   - cuantos grupos hay
+ *              miembros    - arreglo de membresias
+ *              numMiembros - cuantas membresias hay
+ *              usuario     - usuario que inicio sesion
+ * Retorno:     El id del grupo elegido, o 0 si no eligio ninguno.
+ */
+static int cambiarGrupoActivo(const Grupo grupos[], int numGrupos,
+                              const MiembroGrupo miembros[], int numMiembros,
+                              const Usuario *usuario) {
+    int posiciones[MAX_GRUPOS]; /* Posicion de cada grupo que se muestra */
+    int cuantos = 0;
+    int opcion = 0;
+    int i = 0;
+
+    printf("\n--- Cambiar de grupo ---\n");
+    for (i = 0; i < numGrupos; i++) {
+        if (usuario->esAdministrador ||
+            esMiembro(miembros, numMiembros, grupos[i].id, usuario->id)) {
+            posiciones[cuantos] = i;
+            cuantos++;
+            printf("%d. %s\n", cuantos, grupos[i].nombre);
+        }
+    }
+    if (cuantos == 0) {
+        printf("No perteneces a ningun grupo.\n");
+        return 0;
+    }
+    printf("0. Cancelar\n");
+    printf("Elige el grupo: ");
+    opcion = leerEntero(0, cuantos);
+    if (opcion == 0) {
+        return 0;
+    }
+    return grupos[posiciones[opcion - 1]].id;
+}
+
+/*
+ * Funcion:     menuAdministracion
+ * Descripcion: Menu de administracion (opcion 7). Solo entra el
+ *              Administrador (RNF-08). Al salir guarda los cambios.
+ * Parametros:  los arreglos y contadores del sistema, el usuario activo
+ *              y el apuntador al id del grupo activo.
+ * Retorno:     Ninguno.
+ */
+static void menuAdministracion(Usuario usuarios[], int *numUsuarios,
+                               Grupo grupos[], int *numGrupos,
+                               MiembroGrupo miembros[], int *numMiembros,
+                               Categoria categorias[], int *numCategorias,
+                               const Gasto gastos[], int numGastos,
+                               int usuarioActivo, int *idGrupoActivo) {
+    int opcion = 0;
+
+    if (!usuarios[usuarioActivo].esAdministrador) {
+        printf("Solo el Administrador puede entrar a este menu.\n");
+        return;
+    }
+
+    do {
+        printf("\n=========== ADMINISTRACION ===========\n");
+        printf("  1. Grupos\n");
+        printf("  2. Miembros del grupo activo\n");
+        printf("  3. Categorias\n");
+        printf("  0. Regresar\n");
+        printf(" Opcion: ");
+        opcion = leerEntero(0, 3);
+
+        switch (opcion) {
+            case 1:
+                menuGrupos(grupos, numGrupos, miembros, numMiembros,
+                           usuarios[usuarioActivo].id, idGrupoActivo);
+                break;
+            case 2:
+                menuMiembros(miembros, numMiembros, usuarios, numUsuarios,
+                             *idGrupoActivo);
+                break;
+            case 3:
+                menuCategorias(categorias, numCategorias, gastos, numGastos);
+                break;
+        }
+    } while (opcion != 0);
+
+    /* Guarda lo que se haya cambiado (RF-16) */
+    if (!guardarUsuarios(usuarios, *numUsuarios) ||
+        !guardarGrupos(grupos, *numGrupos) ||
+        !guardarMiembros(miembros, *numMiembros) ||
+        !guardarCategorias(categorias, *numCategorias)) {
+        printf("Error: no se pudieron guardar los cambios.\n");
+    }
+}
+
 int main(void) {
     /* Datos del sistema: un arreglo y un contador por estructura */
     Usuario usuarios[MAX_USUARIOS];
@@ -67,8 +299,10 @@ int main(void) {
     Liquidacion liquidaciones[MAX_LIQUIDACIONES];
     int numLiquidaciones = 0;
     int usuarioActivo = -1; /* -1 significa que no hay usuario logueado */
-    int grupoActivo = -1; /* Posicion del grupo activo; -1 si no hay */
+    int idGrupoActivo = 0; /* id del grupo activo; 0 si no hay */
     int opcion = 0;       /* Opcion elegida en el menu principal */
+    int idElegido = 0;    /* Grupo elegido en la opcion 6 */
+    int i = 0;
 
     printf("Micha y Micha\n");
 
@@ -113,9 +347,18 @@ int main(void) {
         return 0;
     }
 
+    /* Grupo activo inicial: el primero al que pertenece el usuario */
+    for (i = 0; i < numGrupos && idGrupoActivo == 0; i++) {
+        if (esMiembro(miembros, numMiembros, grupos[i].id,
+                      usuarios[usuarioActivo].id)) {
+            idGrupoActivo = grupos[i].id;
+        }
+    }
+
     /* Menu principal: se repite hasta elegir 0 */
     do {
-        mostrarMenuPrincipal(usuarios, usuarioActivo, grupos, grupoActivo);
+        mostrarMenuPrincipal(usuarios, usuarioActivo, grupos,
+                             buscarGrupoPorId(grupos, numGrupos, idGrupoActivo));
         opcion = leerEntero(0, 7);
 
         switch (opcion) {
@@ -125,8 +368,18 @@ int main(void) {
             case 4:
             case 5:
             case 6:
+                idElegido = cambiarGrupoActivo(grupos, numGrupos, miembros,
+                                               numMiembros,
+                                               &usuarios[usuarioActivo]);
+                if (idElegido != 0) {
+                    idGrupoActivo = idElegido;
+                }
+                break;
             case 7:
-                printf("Disponible en un proximo incremento.\n");
+                menuAdministracion(usuarios, &numUsuarios, grupos, &numGrupos,
+                                   miembros, &numMiembros, categorias,
+                                   &numCategorias, gastos, numGastos,
+                                   usuarioActivo, &idGrupoActivo);
                 break;
             case 0:
                                 /* Guardado de datos al salir (RF-16) */
