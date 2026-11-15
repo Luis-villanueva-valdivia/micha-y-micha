@@ -41,7 +41,7 @@ static void mostrarMenuPrincipal(const Usuario usuarios[], int usuarioActivo,
     printf("\n");
 
     printf("----------------------------------------------\n");
-    printf("  1. Registrar gasto\n");
+    printf("  1. Gastos (registrar / eliminar)\n");
     printf("  2. Consultar saldos\n");
     printf("  3. Simplificar deudas\n");
     printf("  4. Registrar liquidacion (pago)\n");
@@ -51,6 +51,62 @@ static void mostrarMenuPrincipal(const Usuario usuarios[], int usuarioActivo,
     printf("  0. Guardar y salir\n");
     printf("----------------------------------------------\n");
     printf(" Opcion: ");
+}
+
+/*
+ * Funcion:     menuGastos
+ * Descripcion: Submenu de la opcion 1: registrar un gasto (RF-06) o
+ *              eliminar uno (RF-09). Guarda gastos y divisiones despues de
+ *              cada cambio (RF-16). Pide tener un grupo activo.
+ * Parametros:  los arreglos y contadores de gastos y divisiones, los
+ *              datos del grupo, el usuario activo y el id del grupo
+ *              activo.
+ * Retorno:     Ninguno.
+ */
+static void menuGastos(Gasto gastos[], int *numGastos,
+                       DivisionGasto divisiones[], int *numDivisiones,
+                       const Usuario usuarios[], int numUsuarios,
+                       const MiembroGrupo miembros[], int numMiembros,
+                       const Categoria categorias[], int numCategorias,
+                       int usuarioActivo, int idGrupoActivo) {
+    int opcion = 0;
+    int cambio = 0;
+
+    if (idGrupoActivo == 0) {
+        printf("Primero elige un grupo activo (opcion 6).\n");
+        return;
+    }
+
+    do {
+        printf("\n--- Gastos ---\n");
+        printf("1. Registrar gasto\n");
+        printf("2. Eliminar gasto\n");
+        printf("0. Regresar\n");
+        printf("Opcion: ");
+        opcion = leerEntero(0, 2);
+
+        cambio = 0;
+        switch (opcion) {
+            case 1:
+                cambio = registrarGasto(gastos, numGastos, divisiones,
+                                        numDivisiones, idGrupoActivo,
+                                        usuarios, numUsuarios, miembros,
+                                        numMiembros, categorias,
+                                        numCategorias);
+                break;
+            case 2:
+                cambio = eliminarGasto(gastos, numGastos, divisiones,
+                                       numDivisiones, idGrupoActivo,
+                                       &usuarios[usuarioActivo], usuarios,
+                                       numUsuarios);
+                break;
+        }
+        /* Se guarda al registrar cada cambio (RF-16) */
+        if (cambio && (!guardarGastos(gastos, *numGastos) ||
+                       !guardarDivisiones(divisiones, *numDivisiones))) {
+            printf("Error: no se pudieron guardar los gastos.\n");
+        }
+    } while (opcion != 0);
 }
 
 /*
@@ -369,19 +425,10 @@ int main(void) {
 
         switch (opcion) {
             case 1:
-                if (idGrupoActivo == 0) {
-                    printf("Primero elige un grupo activo (opcion 6).\n");
-                } else if (registrarGasto(gastos, &numGastos, divisiones,
-                                          &numDivisiones, idGrupoActivo,
-                                          usuarios, numUsuarios, miembros,
-                                          numMiembros, categorias,
-                                          numCategorias)) {
-                    /* Se guarda al registrar el cambio (RF-16) */
-                    if (!guardarGastos(gastos, numGastos) ||
-                        !guardarDivisiones(divisiones, numDivisiones)) {
-                        printf("Error: no se pudo guardar el gasto.\n");
-                    }
-                }
+                menuGastos(gastos, &numGastos, divisiones, &numDivisiones,
+                           usuarios, numUsuarios, miembros, numMiembros,
+                           categorias, numCategorias, usuarioActivo,
+                           idGrupoActivo);
                 break;
             case 2:
             case 3:
