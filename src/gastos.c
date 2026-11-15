@@ -5,8 +5,9 @@
  * Fecha:       15/11/2026
  * Version:     0.3
  * Descripcion: Implementacion del registro de gastos: captura de datos,
- *              eleccion de pagador y participantes, resumen y
- *              confirmacion (RF-06, CU-02).
+ *              eleccion de pagador y participantes, division en partes
+ *              iguales, resumen y confirmacion (RF-06, RF-07, CU-02,
+ *              CU-03).
  */
 #include <stdio.h>
 #include "gastos.h"
@@ -132,6 +133,40 @@ static int elegirParticipantes(const Usuario usuarios[], int numUsuarios,
     } while (opcion != 0 || cuantos == 0);
 
     return cuantos;
+}
+
+/*
+ * Funcion:     dividirIgual
+ * Descripcion: Reparte un monto en centavos en partes iguales. Como no
+ *              siempre es exacto, el residuo (los centavos que sobran) se
+ *              le asigna al pagador si participa; si no, al primer
+ *              participante. Asi la suma de las partes es el total
+ *              (RF-07, RNF-04). Ej.: $100.00 entre 3 -> 33.34, 33.33, 33.33.
+ * Parametros:  montoCentavos    - total a repartir
+ *              idsParticipantes - ids de los participantes
+ *              numParticipantes - cuantos participantes hay (> 0)
+ *              idPagador        - id del usuario que pago
+ *              partes           - arreglo de salida, una parte por
+ *                                 participante en el mismo orden
+ * Retorno:     Ninguno.
+ */
+void dividirIgual(long montoCentavos, const int idsParticipantes[],
+                  int numParticipantes, int idPagador, long partes[]) {
+    long base = 0;
+    long residuo = 0;
+    int receptor = 0; /* Posicion que recibe el residuo */
+    int i = 0;
+
+    base = montoCentavos / numParticipantes;
+    residuo = montoCentavos % numParticipantes;
+
+    for (i = 0; i < numParticipantes; i++) {
+        partes[i] = base;
+        if (idsParticipantes[i] == idPagador) {
+            receptor = i;
+        }
+    }
+    partes[receptor] += residuo;
 }
 
 /*
