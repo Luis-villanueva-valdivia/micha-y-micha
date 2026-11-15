@@ -3,7 +3,7 @@
  * Proyecto:    Micha y Micha
  * Autor:       Luis Adrian Villanueva Valdivia
  * Fecha:       30/10/2026
- * Version:     0.2
+ * Version:     0.3
  * Descripcion: Punto de entrada y menu principal. Cada opcion llama a
  *              una funcion de su modulo; aqui no va logica de negocio.
  */
@@ -188,6 +188,47 @@ static void menuCategorias(Categoria categorias[], int *numCategorias,
 }
 
 /*
+ * Funcion:     cambiarGrupoActivo
+ * Descripcion: Muestra los grupos a los que pertenece el usuario (el
+ *              Administrador ve todos) y pide elegir el grupo activo.
+ * Parametros:  grupos      - arreglo de grupos
+ *              numGrupos   - cuantos grupos hay
+ *              miembros    - arreglo de membresias
+ *              numMiembros - cuantas membresias hay
+ *              usuario     - usuario que inicio sesion
+ * Retorno:     El id del grupo elegido, o 0 si no eligio ninguno.
+ */
+static int cambiarGrupoActivo(const Grupo grupos[], int numGrupos,
+                              const MiembroGrupo miembros[], int numMiembros,
+                              const Usuario *usuario) {
+    int posiciones[MAX_GRUPOS]; /* Posicion de cada grupo que se muestra */
+    int cuantos = 0;
+    int opcion = 0;
+    int i = 0;
+
+    printf("\n--- Cambiar de grupo ---\n");
+    for (i = 0; i < numGrupos; i++) {
+        if (usuario->esAdministrador ||
+            esMiembro(miembros, numMiembros, grupos[i].id, usuario->id)) {
+            posiciones[cuantos] = i;
+            cuantos++;
+            printf("%d. %s\n", cuantos, grupos[i].nombre);
+        }
+    }
+    if (cuantos == 0) {
+        printf("No perteneces a ningun grupo.\n");
+        return 0;
+    }
+    printf("0. Cancelar\n");
+    printf("Elige el grupo: ");
+    opcion = leerEntero(0, cuantos);
+    if (opcion == 0) {
+        return 0;
+    }
+    return grupos[posiciones[opcion - 1]].id;
+}
+
+/*
  * Funcion:     menuAdministracion
  * Descripcion: Menu de administracion (opcion 7). Solo entra el
  *              Administrador (RNF-08). Al salir guarda los cambios.
@@ -260,6 +301,8 @@ int main(void) {
     int usuarioActivo = -1; /* -1 significa que no hay usuario logueado */
     int idGrupoActivo = 0; /* id del grupo activo; 0 si no hay */
     int opcion = 0;       /* Opcion elegida en el menu principal */
+    int idElegido = 0;    /* Grupo elegido en la opcion 6 */
+    int i = 0;
 
     printf("Micha y Micha\n");
 
@@ -304,6 +347,14 @@ int main(void) {
         return 0;
     }
 
+    /* Grupo activo inicial: el primero al que pertenece el usuario */
+    for (i = 0; i < numGrupos && idGrupoActivo == 0; i++) {
+        if (esMiembro(miembros, numMiembros, grupos[i].id,
+                      usuarios[usuarioActivo].id)) {
+            idGrupoActivo = grupos[i].id;
+        }
+    }
+
     /* Menu principal: se repite hasta elegir 0 */
     do {
         mostrarMenuPrincipal(usuarios, usuarioActivo, grupos,
@@ -317,7 +368,12 @@ int main(void) {
             case 4:
             case 5:
             case 6:
-                printf("Disponible en un proximo incremento.\n");
+                idElegido = cambiarGrupoActivo(grupos, numGrupos, miembros,
+                                               numMiembros,
+                                               &usuarios[usuarioActivo]);
+                if (idElegido != 0) {
+                    idGrupoActivo = idElegido;
+                }
                 break;
             case 7:
                 menuAdministracion(usuarios, &numUsuarios, grupos, &numGrupos,
