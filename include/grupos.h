@@ -13,6 +13,12 @@
 
 #include "estructuras.h"
 
+/* Indica que grupos tienen saldos pendientes y que miembros del grupo
+   idGrupo tienen saldo distinto de cero, para que eliminarGrupo y
+   quitarMiembro no los borren (E2). Se llama antes de administrar. */
+void fijarBloqueosSaldo(const int idsGrupos[], int numGrupos, int idGrupo,
+                        const int idsUsuarios[], int numUsuarios);
+
 /* Muestra el numero y nombre de cada grupo para elegirlo */
 void listarGrupos(const Grupo grupos[], int numGrupos);
 
