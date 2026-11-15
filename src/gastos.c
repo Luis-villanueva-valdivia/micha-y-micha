@@ -7,7 +7,8 @@
  * Descripcion: Implementacion del registro de gastos: captura de datos,
  *              eleccion de pagador y participantes, division en partes
  *              iguales o personalizadas, resumen y confirmacion (RF-06,
- *              RF-07, RF-08, CU-02, CU-03).
+ *              RF-07, RF-08, CU-02, CU-03), y eliminacion de gastos
+ *              (RF-09).
  */
 #include <stdio.h>
 #include "gastos.h"
@@ -343,5 +344,117 @@ int registrarGasto(Gasto gastos[], int *numGastos,
     }
 
     printf("Gasto registrado.\n");
+    return 1;
+}
+
+/*
+ * Funcion:     listarGastosGrupo
+ * Descripcion: Muestra con un numero los gastos del grupo (fecha,
+ *              descripcion, monto y quien pago) y guarda en posiciones la
+ *              posicion de cada uno en el arreglo de gastos.
+ * Parametros:  gastos      - arreglo de gastos
+ *              numGastos   - cuantos gastos hay
+ *              idGrupo     - id del grupo
+ *              usuarios    - arreglo de usuarios (para los nombres)
+ *              numUsuarios - cuantos usuarios hay
+ *              posiciones  - arreglo de salida (MAX_GASTOS lugares)
+ * Retorno:     Cuantos gastos se mostraron.
+ */
+static int listarGastosGrupo(const Gasto gastos[], int numGastos, int idGrupo,
+                             const Usuario usuarios[], int numUsuarios,
+                             int posiciones[]) {
+    int i = 0;
+    int cuantos = 0;
+
+    for (i = 0; i < numGastos; i++) {
+        if (gastos[i].idGrupo == idGrupo) {
+            posiciones[cuantos] = i;
+            cuantos++;
+            printf("%d. %02d/%02d/%04d  %-25s ", cuantos,
+                   gastos[i].fecha % 100, (gastos[i].fecha / 100) % 100,
+                   gastos[i].fecha / 10000, gastos[i].descripcion);
+            mostrarMonto(gastos[i].montoCentavos);
+            printf("  (pago %s)\n",
+                   nombreUsuario(usuarios, numUsuarios, gastos[i].idPagador));
+        }
+    }
+    return cuantos;
+}
+
+/*
+ * Funcion:     eliminarGasto
+ * Descripcion: Muestra los gastos del grupo, pide elegir uno, revisa que
+ *              el usuario sea quien lo pago o el Administrador, pide
+ *              confirmacion y lo elimina junto con sus divisiones
+ *              (RF-09). Los elementos siguientes se recorren una posicion.
+ * Parametros:  gastos        - arreglo de gastos
+ *              numGastos     - apuntador al contador de gastos
+ *              divisiones    - arreglo de divisiones
+ *              numDivisiones - apuntador al contador de divisiones
+ *              idGrupo       - id del grupo activo
+ *              usuario       - usuario que inicio sesion
+ *              usuarios      - arreglo de usuarios (para los nombres)
+ *              numUsuarios   - cuantos usuarios hay
+ * Retorno:     1 si se elimino, 0 si no.
+ */
+int eliminarGasto(Gasto gastos[], int *numGastos,
+                  DivisionGasto divisiones[], int *numDivisiones,
+                  int idGrupo, const Usuario *usuario,
+                  const Usuario usuarios[], int numUsuarios) {
+    int posiciones[MAX_GASTOS]; /* Posicion de cada gasto que se muestra */
+    int cuantos = 0;
+    int opcion = 0;
+    int posicion = 0;
+    int idGasto = 0;
+    int i = 0;
+    int j = 0;
+
+    printf("\n--- Eliminar gasto ---\n");
+    cuantos = listarGastosGrupo(gastos, *numGastos, idGrupo, usuarios,
+                                numUsuarios, posiciones);
+    if (cuantos == 0) {
+        printf("No hay gastos registrados en el grupo.\n");
+        return 0;
+    }
+    printf("0. Cancelar\n");
+    printf("Elige el gasto: ");
+    opcion = leerEntero(0, cuantos);
+    if (opcion == 0) {
+        return 0;
+    }
+    posicion = posiciones[opcion - 1];
+
+    if (!usuario->esAdministrador &&
+        gastos[posicion].idPagador != usuario->id) {
+        printf("Error: Solo quien pago el gasto o el Administrador puede "
+               "eliminarlo.\n");
+        return 0;
+    }
+
+    printf("Se eliminara \"%s\". Confirmar (1 = si, 0 = no): ",
+           gastos[posicion].descripcion);
+    if (leerEntero(0, 1) == 0) {
+        printf("No se elimino el gasto.\n");
+        return 0;
+    }
+
+    idGasto = gastos[posicion].id;
+
+    /* Recorre los gastos siguientes una posicion a la izquierda */
+    for (i = posicion; i < *numGastos - 1; i++) {
+        gastos[i] = gastos[i + 1];
+    }
+    (*numGastos)--;
+
+    /* Quita las divisiones del gasto, conservando las demas en orden */
+    for (i = 0; i < *numDivisiones; i++) {
+        if (divisiones[i].idGasto != idGasto) {
+            divisiones[j] = divisiones[i];
+            j++;
+        }
+    }
+    *numDivisiones = j;
+
+    printf("Gasto eliminado.\n");
     return 1;
 }
