@@ -13,6 +13,7 @@
 #include "categorias.h"
 #include "gastos.h"
 #include "grupos.h"
+#include "liquidaciones.h"
 #include "saldos.h"
 #include "usuarios.h"
 #include "utilidades.h"
@@ -442,6 +443,12 @@ int main(void) {
                                   miembros, numMiembros, gastos, numGastos,
                                   divisiones, numDivisiones, liquidaciones,
                                   numLiquidaciones);
+                }
+                break;
+            case 3:
+                if (idGrupoActivo == 0) {
+                    printf("Primero elige un grupo activo (opcion 6).\n");
+                } else {
                     mostrarDeudasSimplificadas(idGrupoActivo, usuarios,
                                                numUsuarios, miembros,
                                                numMiembros, gastos, numGastos,
@@ -450,8 +457,20 @@ int main(void) {
                                                numLiquidaciones);
                 }
                 break;
-            case 3:
             case 4:
+                if (idGrupoActivo == 0) {
+                    printf("Primero elige un grupo activo (opcion 6).\n");
+                } else if (registrarLiquidacion(liquidaciones,
+                                                &numLiquidaciones,
+                                                idGrupoActivo, usuarios,
+                                                numUsuarios, miembros,
+                                                numMiembros, gastos, numGastos,
+                                                divisiones, numDivisiones) &&
+                           !guardarLiquidaciones(liquidaciones,
+                                                 numLiquidaciones)) {
+                    printf("Error: no se pudo guardar el pago.\n");
+                }
+                break;
             case 5:
                 printf("Disponible en un proximo incremento.\n");
                 break;
