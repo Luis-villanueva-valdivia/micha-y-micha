@@ -1,0 +1,248 @@
+/*
+ * Archivo:     gastos.c
+ * Proyecto:    Micha y Micha
+ * Autor:       Luis Adrian Villanueva Valdivia
+ * Fecha:       15/11/2026
+ * Version:     0.3
+ * Descripcion: Implementacion del registro de gastos: captura de datos,
+ *              eleccion de pagador y participantes, resumen y
+ *              confirmacion (RF-06, CU-02).
+ */
+#include <stdio.h>
+#include "gastos.h"
+#include "categorias.h"
+#include "utilidades.h"
+
+/*
+ * Funcion:     siguienteIdGasto
+ * Descripcion: Calcula el id para un gasto nuevo: el mayor id actual mas
+ *              1, para no repetir ids aunque se eliminen gastos.
+ * Parametros:  gastos    - arreglo de gastos
+ *              numGastos - cuantos gastos hay en el arreglo
+ * Retorno:     El id disponible (1 si no hay gastos).
+ */
+static int siguienteIdGasto(const Gasto gastos[], int numGastos) {
+    int i = 0;
+    int mayor = 0;
+
+    for (i = 0; i < numGastos; i++) {
+        if (gastos[i].id > mayor) {
+            mayor = gastos[i].id;
+        }
+    }
+    return mayor + 1;
+}
+
+/*
+ * Funcion:     nombreUsuario
+ * Descripcion: Busca el nombre de un usuario por su id.
+ * Parametros:  usuarios    - arreglo de usuarios
+ *              numUsuarios - cuantos usuarios hay
+ *              idUsuario   - id a buscar
+ * Retorno:     Apuntador al nombre, o "(desconocido)" si no existe.
+ */
+static const char *nombreUsuario(const Usuario usuarios[], int numUsuarios,
+                                 int idUsuario) {
+    int i = 0;
+
+    for (i = 0; i < numUsuarios; i++) {
+        if (usuarios[i].id == idUsuario) {
+            return usuarios[i].nombre;
+        }
+    }
+    return "(desconocido)";
+}
+
+/*
+ * Funcion:     idsDelGrupo
+ * Descripcion: Copia en idsMiembros los ids de los usuarios que
+ *              pertenecen al grupo, en el orden de las membresias.
+ * Parametros:  miembros    - arreglo de membresias
+ *              numMiembros - cuantas membresias hay
+ *              idGrupo     - id del grupo
+ *              idsMiembros - arreglo de salida (MAX_MIEMBROS lugares)
+ * Retorno:     Cuantos miembros se copiaron.
+ */
+static int idsDelGrupo(const MiembroGrupo miembros[], int numMiembros,
+                       int idGrupo, int idsMiembros[]) {
+    int i = 0;
+    int cuantos = 0;
+
+    for (i = 0; i < numMiembros && cuantos < MAX_MIEMBROS; i++) {
+        if (miembros[i].idGrupo == idGrupo) {
+            idsMiembros[cuantos] = miembros[i].idUsuario;
+            cuantos++;
+        }
+    }
+    return cuantos;
+}
+
+/*
+ * Funcion:     elegirParticipantes
+ * Descripcion: Pide quienes participan en el gasto: todos los miembros
+ *              del grupo o algunos elegidos uno por uno. Solo se pueden
+ *              elegir miembros del grupo (E3) y no se repiten.
+ * Parametros:  usuarios        - arreglo de usuarios (para los nombres)
+ *              numUsuarios     - cuantos usuarios hay
+ *              idsMiembros     - ids de los miembros del grupo
+ *              totalMiembros   - cuantos miembros tiene el grupo
+ *              idsParticipantes - arreglo de salida con los ids elegidos
+ * Retorno:     Cuantos participantes se eligieron (al menos 1).
+ */
+static int elegirParticipantes(const Usuario usuarios[], int numUsuarios,
+                               const int idsMiembros[], int totalMiembros,
+                               int idsParticipantes[]) {
+    int elegido[MAX_MIEMBROS] = {0}; /* 1 si el miembro ya se eligio */
+    int cuantos = 0;
+    int opcion = 0;
+    int i = 0;
+
+    printf("Participantes:\n");
+    printf("1. Todos los miembros del grupo\n");
+    printf("2. Elegir uno por uno\n");
+    printf("Opcion: ");
+    opcion = leerEntero(1, 2);
+
+    if (opcion == 1) {
+        for (i = 0; i < totalMiembros; i++) {
+            idsParticipantes[i] = idsMiembros[i];
+        }
+        return totalMiembros;
+    }
+
+    do {
+        for (i = 0; i < totalMiembros; i++) {
+            printf("%d. %s%s\n", i + 1,
+                   nombreUsuario(usuarios, numUsuarios, idsMiembros[i]),
+                   elegido[i] ? " (elegido)" : "");
+        }
+        printf("0. Terminar\n");
+        printf("Agrega un participante: ");
+        opcion = leerEntero(0, totalMiembros);
+
+        if (opcion == 0 && cuantos == 0) {
+            printf("Error: Debe haber al menos un participante.\n");
+        } else if (opcion != 0 && elegido[opcion - 1]) {
+            printf("Error: Ese miembro ya esta en la lista.\n");
+        } else if (opcion != 0) {
+            elegido[opcion - 1] = 1;
+            idsParticipantes[cuantos] = idsMiembros[opcion - 1];
+            cuantos++;
+        }
+    } while (opcion != 0 || cuantos == 0);
+
+    return cuantos;
+}
+
+/*
+ * Funcion:     registrarGasto
+ * Descripcion: Captura un gasto del grupo: descripcion, monto (E1),
+ *              fecha (E2), categoria, pagador y participantes (E3).
+ *              Muestra un resumen y solo guarda si se confirma (E4). Avisa
+ *              si ya hay MAX_GASTOS (E5). Por cada participante agrega una
+ *              DivisionGasto; las partes se calculan al dividir el gasto.
+ * Parametros:  gastos        - arreglo de gastos
+ *              numGastos     - apuntador al contador de gastos
+ *              divisiones    - arreglo de divisiones
+ *              numDivisiones - apuntador al contador de divisiones
+ *              idGrupo       - id del grupo activo
+ *              usuarios, numUsuarios     - usuarios del sistema
+ *              miembros, numMiembros     - membresias de los grupos
+ *              categorias, numCategorias - categorias disponibles
+ * Retorno:     1 si se registro, 0 si no.
+ */
+int registrarGasto(Gasto gastos[], int *numGastos,
+                   DivisionGasto divisiones[], int *numDivisiones,
+                   int idGrupo,
+                   const Usuario usuarios[], int numUsuarios,
+                   const MiembroGrupo miembros[], int numMiembros,
+                   const Categoria categorias[], int numCategorias) {
+    Gasto nuevo;
+    int idsMiembros[MAX_MIEMBROS];
+    int idsParticipantes[MAX_MIEMBROS];
+    int totalMiembros = 0;
+    int numParticipantes = 0;
+    int opcion = 0;
+    int i = 0;
+
+    if (*numGastos >= MAX_GASTOS) {
+        printf("Error: Ya se alcanzo el maximo de %d gastos.\n", MAX_GASTOS);
+        return 0;
+    }
+    totalMiembros = idsDelGrupo(miembros, numMiembros, idGrupo, idsMiembros);
+    if (totalMiembros == 0) {
+        printf("Error: El grupo no tiene miembros.\n");
+        return 0;
+    }
+    if (numCategorias == 0) {
+        printf("Error: No hay categorias registradas.\n");
+        return 0;
+    }
+    if (*numDivisiones + totalMiembros > MAX_DIVISIONES) {
+        printf("Error: Ya no caben mas divisiones de gastos.\n");
+        return 0;
+    }
+
+    printf("\n--- Registrar gasto ---\n");
+    printf("Descripcion: ");
+    leerTexto(nuevo.descripcion, LONG_DESCRIPCION + 1);
+    printf("Monto (por ejemplo 840.50): ");
+    nuevo.montoCentavos = leerMonto();
+    printf("Fecha (dd/mm/aaaa): ");
+    nuevo.fecha = leerFecha();
+
+    printf("Categoria:\n");
+    listarCategorias(categorias, numCategorias);
+    printf("Elige la categoria: ");
+    nuevo.idCategoria = categorias[leerEntero(1, numCategorias) - 1].id;
+
+    printf("Quien pago:\n");
+    for (i = 0; i < totalMiembros; i++) {
+        printf("%d. %s\n", i + 1,
+               nombreUsuario(usuarios, numUsuarios, idsMiembros[i]));
+    }
+    printf("Elige al pagador: ");
+    nuevo.idPagador = idsMiembros[leerEntero(1, totalMiembros) - 1];
+
+    numParticipantes = elegirParticipantes(usuarios, numUsuarios, idsMiembros,
+                                           totalMiembros, idsParticipantes);
+
+    /* Resumen antes de guardar (E4) */
+    printf("\n--- Resumen ---\n");
+    printf("Descripcion:   %s\n", nuevo.descripcion);
+    printf("Monto:         ");
+    mostrarMonto(nuevo.montoCentavos);
+    printf("\nFecha:         %02d/%02d/%04d\n", nuevo.fecha % 100,
+           (nuevo.fecha / 100) % 100, nuevo.fecha / 10000);
+    printf("Pago:          %s\n",
+           nombreUsuario(usuarios, numUsuarios, nuevo.idPagador));
+    printf("Participantes: ");
+    for (i = 0; i < numParticipantes; i++) {
+        printf("%s%s", nombreUsuario(usuarios, numUsuarios,
+                                     idsParticipantes[i]),
+               (i < numParticipantes - 1) ? ", " : "\n");
+    }
+    printf("Guardar el gasto (1 = si, 0 = cancelar): ");
+    opcion = leerEntero(0, 1);
+    if (opcion == 0) {
+        printf("Gasto cancelado; no se guardo nada.\n");
+        return 0;
+    }
+
+    nuevo.id = siguienteIdGasto(gastos, *numGastos);
+    nuevo.idGrupo = idGrupo;
+    nuevo.tipoDivision = DIVISION_IGUAL;
+    gastos[*numGastos] = nuevo;
+    (*numGastos)++;
+
+    /* Una division por participante; la parte se calcula al dividir */
+    for (i = 0; i < numParticipantes; i++) {
+        divisiones[*numDivisiones].idGasto = nuevo.id;
+        divisiones[*numDivisiones].idUsuario = idsParticipantes[i];
+        divisiones[*numDivisiones].montoCentavos = 0;
+        (*numDivisiones)++;
+    }
+
+    printf("Gasto registrado.\n");
+    return 1;
+}
