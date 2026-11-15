@@ -5,12 +5,19 @@
  * Fecha:       15/11/2026
  * Version:     0.3
  * Descripcion: Registro de gastos compartidos del grupo activo y de sus
- *              participantes (RF-06, CU-02).
+ *              participantes (RF-06, CU-02), y su division en partes
+ *              iguales (RF-07, CU-03).
  */
 #ifndef MICHAYMICHA_GASTOS_H
 #define MICHAYMICHA_GASTOS_H
 
 #include "estructuras.h"
+
+/* Reparte montoCentavos en partes iguales entre numParticipantes y deja
+   cada parte en partes[]. El residuo se asigna al pagador si participa
+   (si no, al primero), de modo que la suma es exactamente el total. */
+void dividirIgual(long montoCentavos, const int idsParticipantes[],
+                  int numParticipantes, int idPagador, long partes[]);
 
 /* Pide los datos de un gasto del grupo idGrupo (descripcion, monto,
    fecha, categoria, pagador y participantes), muestra un resumen y, si se
