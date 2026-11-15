@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include "estructuras.h"
 #include "archivos.h"
+#include "categorias.h"
 #include "grupos.h"
 #include "usuarios.h"
 #include "utilidades.h"
@@ -149,6 +150,44 @@ static void menuMiembros(MiembroGrupo miembros[], int *numMiembros,
 }
 
 /*
+ * Funcion:     menuCategorias
+ * Descripcion: Submenu para agregar, renombrar y eliminar categorias
+ *              (RF-05).
+ * Parametros:  categorias    - arreglo de categorias
+ *              numCategorias - apuntador al contador de categorias
+ *              gastos        - arreglo de gastos (para no borrar usadas)
+ *              numGastos     - cuantos gastos hay
+ * Retorno:     Ninguno.
+ */
+static void menuCategorias(Categoria categorias[], int *numCategorias,
+                           const Gasto gastos[], int numGastos) {
+    int opcion = 0;
+
+    do {
+        printf("\n--- Categorias ---\n");
+        listarCategorias(categorias, *numCategorias);
+        printf("1. Agregar categoria\n");
+        printf("2. Renombrar categoria\n");
+        printf("3. Eliminar categoria\n");
+        printf("0. Regresar\n");
+        printf("Opcion: ");
+        opcion = leerEntero(0, 3);
+
+        switch (opcion) {
+            case 1:
+                agregarCategoria(categorias, numCategorias);
+                break;
+            case 2:
+                renombrarCategoria(categorias, *numCategorias);
+                break;
+            case 3:
+                eliminarCategoria(categorias, numCategorias, gastos, numGastos);
+                break;
+        }
+    } while (opcion != 0);
+}
+
+/*
  * Funcion:     menuAdministracion
  * Descripcion: Menu de administracion (opcion 7). Solo entra el
  *              Administrador (RNF-08). Al salir guarda los cambios.
@@ -160,6 +199,7 @@ static void menuAdministracion(Usuario usuarios[], int *numUsuarios,
                                Grupo grupos[], int *numGrupos,
                                MiembroGrupo miembros[], int *numMiembros,
                                Categoria categorias[], int *numCategorias,
+                               const Gasto gastos[], int numGastos,
                                int usuarioActivo, int *idGrupoActivo) {
     int opcion = 0;
 
@@ -172,9 +212,10 @@ static void menuAdministracion(Usuario usuarios[], int *numUsuarios,
         printf("\n=========== ADMINISTRACION ===========\n");
         printf("  1. Grupos\n");
         printf("  2. Miembros del grupo activo\n");
+        printf("  3. Categorias\n");
         printf("  0. Regresar\n");
         printf(" Opcion: ");
-        opcion = leerEntero(0, 2);
+        opcion = leerEntero(0, 3);
 
         switch (opcion) {
             case 1:
@@ -184,6 +225,9 @@ static void menuAdministracion(Usuario usuarios[], int *numUsuarios,
             case 2:
                 menuMiembros(miembros, numMiembros, usuarios, numUsuarios,
                              *idGrupoActivo);
+                break;
+            case 3:
+                menuCategorias(categorias, numCategorias, gastos, numGastos);
                 break;
         }
     } while (opcion != 0);
@@ -278,7 +322,8 @@ int main(void) {
             case 7:
                 menuAdministracion(usuarios, &numUsuarios, grupos, &numGrupos,
                                    miembros, &numMiembros, categorias,
-                                   &numCategorias, usuarioActivo, &idGrupoActivo);
+                                   &numCategorias, gastos, numGastos,
+                                   usuarioActivo, &idGrupoActivo);
                 break;
             case 0:
                                 /* Guardado de datos al salir (RF-16) */
