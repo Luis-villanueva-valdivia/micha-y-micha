@@ -5,11 +5,13 @@
  * Fecha:       15/11/2026
  * Version:     0.2
  * Descripcion: Implementacion de la gestion de grupos: listar, crear,
- *              renombrar y eliminar (RF-03, CU-09).
+ *              renombrar y eliminar (RF-03, CU-09), y de sus miembros:
+ *              agregar y quitar (RF-04, CU-10).
  */
 #include <stdio.h>
 #include <string.h>
 #include "grupos.h"
+#include "usuarios.h"
 #include "utilidades.h"
 
 /*
@@ -229,4 +231,221 @@ int eliminarGrupo(Grupo grupos[], int *numGrupos,
 
     printf("Grupo eliminado.\n");
     return idGrupo;
+}
+
+/*
+ * Funcion:     buscarUsuarioPorId
+ * Descripcion: Busca un usuario por su id.
+ * Parametros:  usuarios    - arreglo de usuarios
+ *              numUsuarios - cuantos usuarios hay en el arreglo
+ *              idUsuario   - id a buscar
+ * Retorno:     La posicion del usuario en el arreglo, o -1 si no existe.
+ */
+static int buscarUsuarioPorId(const Usuario usuarios[], int numUsuarios,
+                              int idUsuario) {
+    int i = 0;
+
+    for (i = 0; i < numUsuarios; i++) {
+        if (usuarios[i].id == idUsuario) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+/*
+ * Funcion:     esMiembro
+ * Descripcion: Revisa si existe la membresia (idGrupo, idUsuario).
+ * Parametros:  miembros    - arreglo de membresias
+ *              numMiembros - cuantas membresias hay en el arreglo
+ *              idGrupo     - id del grupo
+ *              idUsuario   - id del usuario
+ * Retorno:     1 si el usuario pertenece al grupo, 0 si no.
+ */
+int esMiembro(const MiembroGrupo miembros[], int numMiembros, int idGrupo,
+              int idUsuario) {
+    int i = 0;
+
+    for (i = 0; i < numMiembros; i++) {
+        if (miembros[i].idGrupo == idGrupo &&
+            miembros[i].idUsuario == idUsuario) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+/*
+ * Funcion:     contarMiembros
+ * Descripcion: Cuenta las membresias que pertenecen a un grupo.
+ * Parametros:  miembros    - arreglo de membresias
+ *              numMiembros - cuantas membresias hay en el arreglo
+ *              idGrupo     - id del grupo
+ * Retorno:     El numero de miembros del grupo.
+ */
+int contarMiembros(const MiembroGrupo miembros[], int numMiembros,
+                   int idGrupo) {
+    int i = 0;
+    int cuenta = 0;
+
+    for (i = 0; i < numMiembros; i++) {
+        if (miembros[i].idGrupo == idGrupo) {
+            cuenta++;
+        }
+    }
+    return cuenta;
+}
+
+/*
+ * Funcion:     listarMiembros
+ * Descripcion: Muestra con un numero (1, 2, 3...) el nombre de cada
+ *              miembro del grupo. Si no tiene miembros, lo indica.
+ * Parametros:  miembros    - arreglo de membresias
+ *              numMiembros - cuantas membresias hay en el arreglo
+ *              idGrupo     - id del grupo
+ *              usuarios    - arreglo de usuarios
+ *              numUsuarios - cuantos usuarios hay en el arreglo
+ * Retorno:     Ninguno.
+ */
+void listarMiembros(const MiembroGrupo miembros[], int numMiembros,
+                    int idGrupo, const Usuario usuarios[], int numUsuarios) {
+    int i = 0;
+    int numero = 0;
+    int posicion = 0;
+
+    for (i = 0; i < numMiembros; i++) {
+        if (miembros[i].idGrupo == idGrupo) {
+            posicion = buscarUsuarioPorId(usuarios, numUsuarios,
+                                          miembros[i].idUsuario);
+            numero++;
+            if (posicion != -1) {
+                printf("%d. %s\n", numero, usuarios[posicion].nombre);
+            } else {
+                printf("%d. (usuario no encontrado)\n", numero);
+            }
+        }
+    }
+    if (numero == 0) {
+        printf("El grupo no tiene miembros.\n");
+    }
+}
+
+/*
+ * Funcion:     agregarMiembro
+ * Descripcion: Agrega al grupo un usuario existente (se elige de la
+ *              lista) o uno nuevo (se registra en ese momento). Avisa si
+ *              ya es miembro (E1) o si el grupo tiene MAX_MIEMBROS (E3).
+ * Parametros:  miembros    - arreglo de membresias
+ *              numMiembros - apuntador al contador de membresias
+ *              idGrupo     - id del grupo al que se agrega
+ *              usuarios    - arreglo de usuarios
+ *              numUsuarios - apuntador al contador de usuarios; aumenta si
+ *                            se registra un usuario nuevo
+ * Retorno:     1 si se agrego, 0 si no.
+ */
+int agregarMiembro(MiembroGrupo miembros[], int *numMiembros, int idGrupo,
+                   Usuario usuarios[], int *numUsuarios) {
+    int opcion = 0;
+    int posicion = 0;
+
+    if (contarMiembros(miembros, *numMiembros, idGrupo) >= MAX_MIEMBROS) {
+        printf("Error: El grupo ya tiene %d miembros.\n", MAX_MIEMBROS);
+        return 0;
+    }
+    if (*numMiembros >= MAX_MEMBRESIAS) {
+        printf("Error: Ya no caben mas membresias.\n");
+        return 0;
+    }
+
+    printf("1. Usuario existente\n");
+    printf("2. Usuario nuevo\n");
+    printf("0. Cancelar\n");
+    printf("Opcion: ");
+    opcion = leerEntero(0, 2);
+
+    if (opcion == 0) {
+        return 0;
+    }
+    if (opcion == 1) {
+        if (*numUsuarios == 0) {
+            printf("No hay usuarios registrados.\n");
+            return 0;
+        }
+        listarUsuarios(usuarios, *numUsuarios);
+        printf("0. Cancelar\n");
+        printf("Elige el usuario: ");
+        posicion = leerEntero(0, *numUsuarios) - 1;
+        if (posicion == -1) {
+            return 0;
+        }
+    } else {
+        if (!registrarUsuario(usuarios, numUsuarios)) {
+            return 0;
+        }
+        posicion = *numUsuarios - 1; /* El recien registrado va al final */
+    }
+
+    if (esMiembro(miembros, *numMiembros, idGrupo, usuarios[posicion].id)) {
+        printf("Error: %s ya es miembro del grupo.\n",
+               usuarios[posicion].nombre);
+        return 0;
+    }
+
+    miembros[*numMiembros].idGrupo = idGrupo;
+    miembros[*numMiembros].idUsuario = usuarios[posicion].id;
+    (*numMiembros)++;
+
+    printf("%s se agrego al grupo.\n", usuarios[posicion].nombre);
+    return 1;
+}
+
+/*
+ * Funcion:     quitarMiembro
+ * Descripcion: Muestra los miembros del grupo, pide elegir uno y quita su
+ *              membresia. El bloqueo por saldo distinto de cero (E2) se
+ *              agrega cuando exista el calculo de saldos.
+ * Parametros:  miembros    - arreglo de membresias
+ *              numMiembros - apuntador al contador de membresias
+ *              idGrupo     - id del grupo
+ *              usuarios    - arreglo de usuarios
+ *              numUsuarios - cuantos usuarios hay en el arreglo
+ * Retorno:     1 si se quito, 0 si no.
+ */
+int quitarMiembro(MiembroGrupo miembros[], int *numMiembros, int idGrupo,
+                  const Usuario usuarios[], int numUsuarios) {
+    int total = 0;
+    int elegido = 0;
+    int numero = 0;
+    int i = 0;
+
+    total = contarMiembros(miembros, *numMiembros, idGrupo);
+    if (total == 0) {
+        printf("El grupo no tiene miembros.\n");
+        return 0;
+    }
+
+    listarMiembros(miembros, *numMiembros, idGrupo, usuarios, numUsuarios);
+    printf("0. Cancelar\n");
+    printf("Elige el miembro a quitar: ");
+    elegido = leerEntero(0, total);
+    if (elegido == 0) {
+        return 0;
+    }
+
+    /* Busca la membresia numero "elegido" del grupo y la quita */
+    for (i = 0; i < *numMiembros; i++) {
+        if (miembros[i].idGrupo == idGrupo) {
+            numero++;
+            if (numero == elegido) {
+                break;
+            }
+        }
+    }
+    for (; i < *numMiembros - 1; i++) {
+        miembros[i] = miembros[i + 1];
+    }
+    (*numMiembros)--;
+
+    printf("Miembro quitado del grupo.\n");
+    return 1;
 }
