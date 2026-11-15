@@ -90,6 +90,9 @@ static void menuReportes(const Gasto gastos[], int numGastos,
                                  numUsuarios, categorias, numCategorias);
                 break;
             case 2:
+                reportePorCategoria(idGrupoActivo, gastos, numGastos,
+                                    categorias, numCategorias);
+                break;
             case 3:
                 printf("Disponible en un proximo incremento.\n");
                 break;
