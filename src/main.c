@@ -14,6 +14,7 @@
 #include "gastos.h"
 #include "grupos.h"
 #include "liquidaciones.h"
+#include "reportes.h"
 #include "saldos.h"
 #include "usuarios.h"
 #include "utilidades.h"
@@ -53,6 +54,47 @@ static void mostrarMenuPrincipal(const Usuario usuarios[], int usuarioActivo,
     printf("  0. Guardar y salir\n");
     printf("----------------------------------------------\n");
     printf(" Opcion: ");
+}
+
+/*
+ * Funcion:     menuReportes
+ * Descripcion: Submenu de la opcion 5 con los reportes del grupo activo.
+ *              Pide tener un grupo activo.
+ * Parametros:  los datos del sistema necesarios para los reportes y el id
+ *              del grupo activo.
+ * Retorno:     Ninguno.
+ */
+static void menuReportes(const Gasto gastos[], int numGastos,
+                         const Usuario usuarios[], int numUsuarios,
+                         const Categoria categorias[], int numCategorias,
+                         int idGrupoActivo) {
+    int opcion = 0;
+
+    if (idGrupoActivo == 0) {
+        printf("Primero elige un grupo activo (opcion 6).\n");
+        return;
+    }
+
+    do {
+        printf("\n--- Reportes ---\n");
+        printf("1. Historial de gastos\n");
+        printf("2. Gastos por categoria\n");
+        printf("3. Gastos por persona\n");
+        printf("0. Regresar\n");
+        printf("Opcion: ");
+        opcion = leerEntero(0, 3);
+
+        switch (opcion) {
+            case 1:
+                mostrarHistorial(idGrupoActivo, gastos, numGastos, usuarios,
+                                 numUsuarios, categorias, numCategorias);
+                break;
+            case 2:
+            case 3:
+                printf("Disponible en un proximo incremento.\n");
+                break;
+        }
+    } while (opcion != 0);
 }
 
 /*
@@ -472,7 +514,8 @@ int main(void) {
                 }
                 break;
             case 5:
-                printf("Disponible en un proximo incremento.\n");
+                menuReportes(gastos, numGastos, usuarios, numUsuarios,
+                             categorias, numCategorias, idGrupoActivo);
                 break;
             case 6:
                 idElegido = cambiarGrupoActivo(grupos, numGrupos, miembros,
