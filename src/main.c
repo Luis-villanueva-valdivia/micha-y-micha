@@ -11,6 +11,7 @@
 #include "estructuras.h"
 #include "archivos.h"
 #include "categorias.h"
+#include "gastos.h"
 #include "grupos.h"
 #include "usuarios.h"
 #include "utilidades.h"
@@ -368,6 +369,20 @@ int main(void) {
 
         switch (opcion) {
             case 1:
+                if (idGrupoActivo == 0) {
+                    printf("Primero elige un grupo activo (opcion 6).\n");
+                } else if (registrarGasto(gastos, &numGastos, divisiones,
+                                          &numDivisiones, idGrupoActivo,
+                                          usuarios, numUsuarios, miembros,
+                                          numMiembros, categorias,
+                                          numCategorias)) {
+                    /* Se guarda al registrar el cambio (RF-16) */
+                    if (!guardarGastos(gastos, numGastos) ||
+                        !guardarDivisiones(divisiones, numDivisiones)) {
+                        printf("Error: no se pudo guardar el gasto.\n");
+                    }
+                }
+                break;
             case 2:
             case 3:
             case 4:
