@@ -6,8 +6,8 @@
  * Version:     0.3
  * Descripcion: Implementacion del registro de gastos: captura de datos,
  *              eleccion de pagador y participantes, division en partes
- *              iguales, resumen y confirmacion (RF-06, RF-07, CU-02,
- *              CU-03).
+ *              iguales o personalizadas, resumen y confirmacion (RF-06,
+ *              RF-07, RF-08, CU-02, CU-03).
  */
 #include <stdio.h>
 #include "gastos.h"
@@ -167,6 +167,48 @@ void dividirIgual(long montoCentavos, const int idsParticipantes[],
         }
     }
     partes[receptor] += residuo;
+}
+
+/*
+ * Funcion:     dividirPersonalizado
+ * Descripcion: Pide la parte de cada participante con leerMonto, que
+ *              rechaza montos negativos o en cero (E2). Si la suma no es
+ *              igual al total, muestra la diferencia y vuelve a pedir
+ *              todas las partes (E1) (RF-08, CU-03).
+ * Parametros:  montoCentavos    - total del gasto
+ *              idsParticipantes - ids de los participantes
+ *              numParticipantes - cuantos participantes hay
+ *              usuarios         - arreglo de usuarios (para los nombres)
+ *              numUsuarios      - cuantos usuarios hay
+ *              partes           - arreglo de salida, una parte por
+ *                                 participante en el mismo orden
+ * Retorno:     Ninguno.
+ */
+void dividirPersonalizado(long montoCentavos, const int idsParticipantes[],
+                          int numParticipantes, const Usuario usuarios[],
+                          int numUsuarios, long partes[]) {
+    long suma = 0;
+    int i = 0;
+
+    do {
+        suma = 0;
+        printf("Total a repartir: ");
+        mostrarMonto(montoCentavos);
+        printf("\n");
+        for (i = 0; i < numParticipantes; i++) {
+            printf("Parte de %s: ",
+                   nombreUsuario(usuarios, numUsuarios, idsParticipantes[i]));
+            partes[i] = leerMonto();
+            suma += partes[i];
+        }
+        if (suma != montoCentavos) {
+            printf("Error: Las partes suman ");
+            mostrarMonto(suma);
+            printf(" y la diferencia con el total es ");
+            mostrarMonto(montoCentavos - suma);
+            printf(". Captura las partes de nuevo.\n");
+        }
+    } while (suma != montoCentavos);
 }
 
 /*
