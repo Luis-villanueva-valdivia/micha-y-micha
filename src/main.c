@@ -442,6 +442,12 @@ int main(void) {
                                   miembros, numMiembros, gastos, numGastos,
                                   divisiones, numDivisiones, liquidaciones,
                                   numLiquidaciones);
+                    mostrarDeudasSimplificadas(idGrupoActivo, usuarios,
+                                               numUsuarios, miembros,
+                                               numMiembros, gastos, numGastos,
+                                               divisiones, numDivisiones,
+                                               liquidaciones,
+                                               numLiquidaciones);
                 }
                 break;
             case 3:
