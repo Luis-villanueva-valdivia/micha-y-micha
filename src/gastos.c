@@ -217,7 +217,8 @@ void dividirPersonalizado(long montoCentavos, const int idsParticipantes[],
  *              fecha (E2), categoria, pagador y participantes (E3).
  *              Muestra un resumen y solo guarda si se confirma (E4). Avisa
  *              si ya hay MAX_GASTOS (E5). El monto se divide en partes
- *              iguales y por cada participante se agrega una DivisionGasto.
+ *              iguales o personalizadas y por cada participante se agrega
+ *              una DivisionGasto.
  * Parametros:  gastos        - arreglo de gastos
  *              numGastos     - apuntador al contador de gastos
  *              divisiones    - arreglo de divisiones
@@ -240,6 +241,7 @@ int registrarGasto(Gasto gastos[], int *numGastos,
     long partes[MAX_MIEMBROS]; /* Parte de cada participante, en centavos */
     int totalMiembros = 0;
     int numParticipantes = 0;
+    int tipo = 1; /* 1 = partes iguales, 2 = personalizadas */
     int opcion = 0;
     int i = 0;
 
@@ -284,8 +286,24 @@ int registrarGasto(Gasto gastos[], int *numGastos,
 
     numParticipantes = elegirParticipantes(usuarios, numUsuarios, idsMiembros,
                                            totalMiembros, idsParticipantes);
-    dividirIgual(nuevo.montoCentavos, idsParticipantes, numParticipantes,
-                 nuevo.idPagador, partes);
+
+    /* Con un solo participante no hay nada que elegir */
+    if (numParticipantes > 1) {
+        printf("Como se divide el gasto:\n");
+        printf("1. Partes iguales\n");
+        printf("2. Partes personalizadas\n");
+        printf("Opcion: ");
+        tipo = leerEntero(1, 2);
+    }
+    if (tipo == 1) {
+        nuevo.tipoDivision = DIVISION_IGUAL;
+        dividirIgual(nuevo.montoCentavos, idsParticipantes, numParticipantes,
+                     nuevo.idPagador, partes);
+    } else {
+        nuevo.tipoDivision = DIVISION_PERSONALIZADA;
+        dividirPersonalizado(nuevo.montoCentavos, idsParticipantes,
+                             numParticipantes, usuarios, numUsuarios, partes);
+    }
 
     /* Resumen antes de guardar (E4) */
     printf("\n--- Resumen ---\n");
@@ -296,7 +314,8 @@ int registrarGasto(Gasto gastos[], int *numGastos,
            (nuevo.fecha / 100) % 100, nuevo.fecha / 10000);
     printf("Pago:          %s\n",
            nombreUsuario(usuarios, numUsuarios, nuevo.idPagador));
-    printf("Division en partes iguales:\n");
+    printf("Division en partes %s:\n",
+           (nuevo.tipoDivision == DIVISION_IGUAL) ? "iguales" : "personalizadas");
     for (i = 0; i < numParticipantes; i++) {
         printf("  %-20s ", nombreUsuario(usuarios, numUsuarios,
                                           idsParticipantes[i]));
@@ -312,7 +331,6 @@ int registrarGasto(Gasto gastos[], int *numGastos,
 
     nuevo.id = siguienteIdGasto(gastos, *numGastos);
     nuevo.idGrupo = idGrupo;
-    nuevo.tipoDivision = DIVISION_IGUAL;
     gastos[*numGastos] = nuevo;
     (*numGastos)++;
 
