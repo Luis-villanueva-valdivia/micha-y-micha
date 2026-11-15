@@ -126,3 +126,107 @@ int crearGrupo(Grupo grupos[], int *numGrupos, int idAdministrador) {
     printf("Grupo \"%s\" creado.\n", nuevo.nombre);
     return 1;
 }
+
+/*
+ * Funcion:     elegirGrupo
+ * Descripcion: Muestra la lista de grupos y pide elegir uno. La opcion 0
+ *              cancela.
+ * Parametros:  grupos    - arreglo de grupos
+ *              numGrupos - cuantos grupos hay en el arreglo
+ * Retorno:     La posicion del grupo elegido, o -1 si se cancelo o no
+ *              hay grupos.
+ */
+static int elegirGrupo(const Grupo grupos[], int numGrupos) {
+    int opcion = 0;
+
+    if (numGrupos == 0) {
+        printf("No hay grupos registrados.\n");
+        return -1;
+    }
+    listarGrupos(grupos, numGrupos);
+    printf("0. Cancelar\n");
+    printf("Elige el grupo: ");
+    opcion = leerEntero(0, numGrupos);
+    return opcion - 1; /* 0 se convierte en -1 (cancelar) */
+}
+
+/*
+ * Funcion:     renombrarGrupo
+ * Descripcion: Pide elegir un grupo y le cambia el nombre. Rechaza
+ *              nombres repetidos (E1).
+ * Parametros:  grupos    - arreglo de grupos
+ *              numGrupos - cuantos grupos hay en el arreglo
+ * Retorno:     1 si se renombro, 0 si no.
+ */
+int renombrarGrupo(Grupo grupos[], int numGrupos) {
+    char nombre[LONG_NOMBRE + 1];
+    int posicion = 0;
+
+    posicion = elegirGrupo(grupos, numGrupos);
+    if (posicion == -1) {
+        return 0;
+    }
+
+    printf("Nuevo nombre: ");
+    leerTexto(nombre, LONG_NOMBRE + 1);
+
+    if (existeNombreGrupo(grupos, numGrupos, nombre, posicion)) {
+        printf("Error: Ya existe un grupo con ese nombre.\n");
+        return 0;
+    }
+
+    strcpy(grupos[posicion].nombre, nombre);
+    printf("Grupo renombrado.\n");
+    return 1;
+}
+
+/*
+ * Funcion:     eliminarGrupo
+ * Descripcion: Pide elegir un grupo, confirma y lo elimina del arreglo
+ *              junto con sus membresias. Los elementos siguientes se
+ *              recorren una posicion para no dejar huecos.
+ * Parametros:  grupos      - arreglo de grupos
+ *              numGrupos   - apuntador al contador de grupos
+ *              miembros    - arreglo de membresias
+ *              numMiembros - apuntador al contador de membresias
+ * Retorno:     El id del grupo eliminado, o 0 si no se elimino.
+ */
+int eliminarGrupo(Grupo grupos[], int *numGrupos,
+                  MiembroGrupo miembros[], int *numMiembros) {
+    int posicion = 0;
+    int idGrupo = 0;
+    int i = 0;
+    int j = 0;
+
+    posicion = elegirGrupo(grupos, *numGrupos);
+    if (posicion == -1) {
+        return 0;
+    }
+
+    printf("Se eliminara \"%s\". Confirmar (1 = si, 0 = no): ",
+           grupos[posicion].nombre);
+    if (leerEntero(0, 1) == 0) {
+        printf("No se elimino el grupo.\n");
+        return 0;
+    }
+
+    idGrupo = grupos[posicion].id;
+
+    /* Recorre los grupos siguientes una posicion a la izquierda */
+    for (i = posicion; i < *numGrupos - 1; i++) {
+        grupos[i] = grupos[i + 1];
+    }
+    (*numGrupos)--;
+
+    /* Quita las membresias del grupo, conservando las demas en orden */
+    for (i = 0; i < *numMiembros; i++) {
+        if (miembros[i].idGrupo != idGrupo) {
+            miembros[j] = miembros[i];
+            j++;
+        }
+    }
+    *numMiembros = j;
+
+    printf("Grupo eliminado.\n");
+    return idGrupo;
+}
