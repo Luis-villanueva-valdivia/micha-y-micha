@@ -6,12 +6,20 @@
  * Version:     0.4
  * Descripcion: Calculo y consulta de los saldos de los miembros de un
  *              grupo a partir de gastos, divisiones y liquidaciones
- *              (RF-10, CU-04).
+ *              (RF-10, CU-04), y simplificacion de deudas (RF-11, CU-05).
  */
 #ifndef MICHAYMICHA_SALDOS_H
 #define MICHAYMICHA_SALDOS_H
 
 #include "estructuras.h"
+
+/* Pago sugerido para saldar las deudas: idDeudor le paga montoCentavos
+   a idAcreedor */
+typedef struct {
+    int idDeudor;
+    int idAcreedor;
+    long montoCentavos;
+} PagoSugerido;
 
 /* Saldo de un usuario en un grupo, en centavos: lo que pago menos lo que
    le toca, mas lo que ha liquidado menos lo que ha recibido. Positivo =
@@ -37,5 +45,25 @@ void mostrarSaldos(int idGrupo,
                    const Gasto gastos[], int numGastos,
                    const DivisionGasto divisiones[], int numDivisiones,
                    const Liquidacion liquidaciones[], int numLiquidaciones);
+
+/* Calcula la lista minima de pagos que deja a todos los miembros del
+   grupo en cero y la guarda en pagos[] (MAX_MIEMBROS lugares). Devuelve
+   cuantos pagos son. */
+int simplificarDeudas(int idGrupo,
+                      const MiembroGrupo miembros[], int numMiembros,
+                      const Gasto gastos[], int numGastos,
+                      const DivisionGasto divisiones[], int numDivisiones,
+                      const Liquidacion liquidaciones[], int numLiquidaciones,
+                      PagoSugerido pagos[]);
+
+/* Muestra los pagos que saldan las deudas del grupo */
+void mostrarDeudasSimplificadas(int idGrupo,
+                                const Usuario usuarios[], int numUsuarios,
+                                const MiembroGrupo miembros[], int numMiembros,
+                                const Gasto gastos[], int numGastos,
+                                const DivisionGasto divisiones[],
+                                int numDivisiones,
+                                const Liquidacion liquidaciones[],
+                                int numLiquidaciones);
 
 #endif /* MICHAYMICHA_SALDOS_H */
