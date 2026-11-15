@@ -14,6 +14,62 @@
 #include "usuarios.h"
 #include "utilidades.h"
 
+/* Bloqueos por saldo pendiente (E2). Los fija main.c con los saldos
+   calculados antes de entrar al menu de administracion; asi este modulo
+   no depende del modulo de saldos. */
+static int gruposBloqueados[MAX_GRUPOS];
+static int numGruposBloqueados = 0;
+static int grupoDeUsuariosBloqueados = 0;
+static int usuariosBloqueados[MAX_MIEMBROS];
+static int numUsuariosBloqueados = 0;
+
+/*
+ * Funcion:     fijarBloqueosSaldo
+ * Descripcion: Guarda que grupos tienen saldos pendientes y que miembros
+ *              del grupo idGrupo tienen saldo distinto de cero.
+ * Parametros:  idsGrupos   - ids de grupos con saldos pendientes
+ *              numGrupos   - cuantos son
+ *              idGrupo     - grupo al que pertenecen idsUsuarios
+ *              idsUsuarios - ids de miembros con saldo distinto de cero
+ *              numUsuarios - cuantos son
+ * Retorno:     Ninguno.
+ */
+void fijarBloqueosSaldo(const int idsGrupos[], int numGrupos, int idGrupo,
+                        const int idsUsuarios[], int numUsuarios) {
+    int i = 0;
+
+    numGruposBloqueados = 0;
+    for (i = 0; i < numGrupos && i < MAX_GRUPOS; i++) {
+        gruposBloqueados[i] = idsGrupos[i];
+        numGruposBloqueados++;
+    }
+    grupoDeUsuariosBloqueados = idGrupo;
+    numUsuariosBloqueados = 0;
+    for (i = 0; i < numUsuarios && i < MAX_MIEMBROS; i++) {
+        usuariosBloqueados[i] = idsUsuarios[i];
+        numUsuariosBloqueados++;
+    }
+}
+
+/*
+ * Funcion:     estaEnLista
+ * Descripcion: Revisa si un id aparece en una lista de ids.
+ * Parametros:  lista - arreglo de ids
+ *              n     - cuantos ids hay en la lista
+ *              id    - id a buscar
+ * Retorno:     1 si aparece, 0 si no.
+ */
+static int estaEnLista(const int lista[], int n, int id) {
+    int i = 0;
+
+    for (i = 0; i < n; i++) {
+        if (lista[i] == id) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
 /*
  * Funcion:     existeNombreGrupo
  * Descripcion: Revisa si ya hay un grupo con ese nombre, sin contar el
@@ -185,8 +241,9 @@ int renombrarGrupo(Grupo grupos[], int numGrupos) {
 /*
  * Funcion:     eliminarGrupo
  * Descripcion: Pide elegir un grupo, confirma y lo elimina del arreglo
- *              junto con sus membresias. Los elementos siguientes se
- *              recorren una posicion para no dejar huecos.
+ *              junto con sus membresias. No elimina un grupo con saldos
+ *              pendientes (E2, ver fijarBloqueosSaldo). Los elementos
+ *              siguientes se recorren una posicion para no dejar huecos.
  * Parametros:  grupos      - arreglo de grupos
  *              numGrupos   - apuntador al contador de grupos
  *              miembros    - arreglo de membresias
@@ -202,6 +259,13 @@ int eliminarGrupo(Grupo grupos[], int *numGrupos,
 
     posicion = elegirGrupo(grupos, *numGrupos);
     if (posicion == -1) {
+        return 0;
+    }
+
+    if (estaEnLista(gruposBloqueados, numGruposBloqueados,
+                    grupos[posicion].id)) {
+        printf("Error: El grupo tiene saldos pendientes; primero liquiden "
+               "las deudas.\n");
         return 0;
     }
 
@@ -402,8 +466,8 @@ int agregarMiembro(MiembroGrupo miembros[], int *numMiembros, int idGrupo,
 /*
  * Funcion:     quitarMiembro
  * Descripcion: Muestra los miembros del grupo, pide elegir uno y quita su
- *              membresia. El bloqueo por saldo distinto de cero (E2) se
- *              agrega cuando exista el calculo de saldos.
+ *              membresia. No quita a un miembro con saldo distinto de
+ *              cero (E2, ver fijarBloqueosSaldo).
  * Parametros:  miembros    - arreglo de membresias
  *              numMiembros - apuntador al contador de membresias
  *              idGrupo     - id del grupo
@@ -441,6 +505,15 @@ int quitarMiembro(MiembroGrupo miembros[], int *numMiembros, int idGrupo,
             }
         }
     }
+
+    if (idGrupo == grupoDeUsuariosBloqueados &&
+        estaEnLista(usuariosBloqueados, numUsuariosBloqueados,
+                    miembros[i].idUsuario)) {
+        printf("Error: El miembro tiene saldo distinto de cero; primero debe "
+               "liquidar.\n");
+        return 0;
+    }
+
     for (; i < *numMiembros - 1; i++) {
         miembros[i] = miembros[i + 1];
     }
