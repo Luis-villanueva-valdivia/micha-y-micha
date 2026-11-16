@@ -185,7 +185,10 @@ static void menuGrupos(Grupo grupos[], int *numGrupos,
 
     do {
         printf("\n--- Grupos ---\n");
+        printf("Registrados:\n");
         listarGrupos(grupos, *numGrupos);
+        printf("----------------------------------------------\n");
+        printf("Que deseas hacer?\n");
         printf("1. Crear grupo\n");
         printf("2. Renombrar grupo\n");
         printf("3. Eliminar grupo\n");
@@ -244,8 +247,11 @@ static void menuMiembros(MiembroGrupo miembros[], int *numMiembros,
 
     do {
         printf("\n--- Miembros del grupo ---\n");
+        printf("Registrados:\n");
         listarMiembros(miembros, *numMiembros, idGrupoActivo, usuarios,
                        *numUsuarios);
+        printf("----------------------------------------------\n");
+        printf("Que deseas hacer?\n");
         printf("1. Agregar miembro\n");
         printf("2. Quitar miembro\n");
         printf("0. Regresar\n");
@@ -281,7 +287,10 @@ static void menuCategorias(Categoria categorias[], int *numCategorias,
 
     do {
         printf("\n--- Categorias ---\n");
+        printf("Registrados:\n");
         listarCategorias(categorias, *numCategorias);
+        printf("----------------------------------------------\n");
+        printf("Que deseas hacer?\n");
         printf("1. Agregar categoria\n");
         printf("2. Renombrar categoria\n");
         printf("3. Eliminar categoria\n");
