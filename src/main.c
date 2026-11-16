@@ -609,13 +609,28 @@ int main(void) {
                                    usuarioActivo, &idGrupoActivo);
                 break;
             case 0:
-                /* Guardado de datos al salir (RF-16) */
-                if (guardarTodo(usuarios, numUsuarios, grupos, numGrupos,
-                                miembros, numMiembros, categorias,
-                                numCategorias, gastos, numGastos, divisiones,
-                                numDivisiones, liquidaciones,
-                                numLiquidaciones)) {
+                /* Guardado de datos al salir (RF-16). Si algo falla, los
+                   datos siguen en memoria y se puede reintentar (CU-12 E1) */
+                while (opcion == 0 &&
+                       !guardarTodo(usuarios, numUsuarios, grupos, numGrupos,
+                                    miembros, numMiembros, categorias,
+                                    numCategorias, gastos, numGastos,
+                                    divisiones, numDivisiones, liquidaciones,
+                                    numLiquidaciones)) {
+                    printf("Revisa que exista la carpeta datos/ y que los "
+                           "archivos no esten abiertos.\n");
+                    printf("1. Reintentar\n");
+                    printf("2. Salir sin guardar\n");
+                    printf("Opcion: ");
+                    if (leerEntero(1, 2) == 2) {
+                        opcion = -1; /* Sale sin guardar */
+                    }
+                }
+                if (opcion == 0) {
                     printf("Datos guardados. Hasta luego.\n");
+                } else {
+                    printf("Los cambios no guardados se perdieron. Hasta luego.\n");
+                    opcion = 0;
                 }
                 break;
         }
