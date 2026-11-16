@@ -5,8 +5,8 @@
  * Fecha:       15/11/2026
  * Version:     1.0
  * Descripcion: Reportes del grupo activo: historial de gastos ordenado
- *              por fecha (RF-13, CU-07) y gastos por categoria (RF-14,
- *              CU-08).
+ *              por fecha (RF-13, CU-07), gastos por categoria (RF-14,
+ *              CU-08) y gastos por persona (RF-15).
  */
 #ifndef MICHAYMICHA_REPORTES_H
 #define MICHAYMICHA_REPORTES_H
@@ -25,5 +25,13 @@ void mostrarHistorial(int idGrupo,
 void reportePorCategoria(int idGrupo,
                          const Gasto gastos[], int numGastos,
                          const Categoria categorias[], int numCategorias);
+
+/* Pide ver todo o un mes y muestra, por cada miembro del grupo, cuanto
+   pago, cuanto le tocaba y la diferencia */
+void reportePorPersona(int idGrupo,
+                       const Gasto gastos[], int numGastos,
+                       const DivisionGasto divisiones[], int numDivisiones,
+                       const Usuario usuarios[], int numUsuarios,
+                       const MiembroGrupo miembros[], int numMiembros);
 
 #endif /* MICHAYMICHA_REPORTES_H */

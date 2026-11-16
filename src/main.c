@@ -65,7 +65,9 @@ static void mostrarMenuPrincipal(const Usuario usuarios[], int usuarioActivo,
  * Retorno:     Ninguno.
  */
 static void menuReportes(const Gasto gastos[], int numGastos,
+                         const DivisionGasto divisiones[], int numDivisiones,
                          const Usuario usuarios[], int numUsuarios,
+                         const MiembroGrupo miembros[], int numMiembros,
                          const Categoria categorias[], int numCategorias,
                          int idGrupoActivo) {
     int opcion = 0;
@@ -94,7 +96,9 @@ static void menuReportes(const Gasto gastos[], int numGastos,
                                     categorias, numCategorias);
                 break;
             case 3:
-                printf("Disponible en un proximo incremento.\n");
+                reportePorPersona(idGrupoActivo, gastos, numGastos,
+                                  divisiones, numDivisiones, usuarios,
+                                  numUsuarios, miembros, numMiembros);
                 break;
         }
     } while (opcion != 0);
@@ -517,7 +521,8 @@ int main(void) {
                 }
                 break;
             case 5:
-                menuReportes(gastos, numGastos, usuarios, numUsuarios,
+                menuReportes(gastos, numGastos, divisiones, numDivisiones,
+                             usuarios, numUsuarios, miembros, numMiembros,
                              categorias, numCategorias, idGrupoActivo);
                 break;
             case 6:
