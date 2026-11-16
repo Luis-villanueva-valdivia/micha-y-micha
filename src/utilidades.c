@@ -2,14 +2,31 @@
  * Archivo:     utilidades.c
  * Proyecto:    Micha y Micha
  * Autor:       Luis Adrian Villanueva Valdivia
- * Fecha:       29/10/2026
- * Version:     0.1
+ * Fecha:       16/11/2026
+ * Version:     1.0
  * Descripcion: Implementacion de la lectura validada de entradas y del
  *              formato de montos en pesos (RNF-02, RNF-03).
  */
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include "utilidades.h"
+
+/*
+ * Funcion:     verificarFinDeEntrada
+ * Descripcion: Si ya no hay mas entrada (el usuario presiono Ctrl+Z en
+ *              Windows o Ctrl+D en Linux), avisa y termina el programa.
+ *              Sin esto, las funciones de lectura volverian a pedir el
+ *              dato para siempre (RNF-03).
+ * Parametros:  Ninguno.
+ * Retorno:     Ninguno.
+ */
+static void verificarFinDeEntrada(void) {
+    if (feof(stdin)) {
+        printf("\nSe cerro la entrada del teclado. El programa termina.\n");
+        exit(EXIT_FAILURE);
+    }
+}
 
 /*
  * Funcion:     limpiarBuffer
@@ -42,6 +59,7 @@ int leerEntero(int minimo, int maximo) {
 
     do {
         leidos = scanf("%d", &numero);
+        verificarFinDeEntrada();
         limpiarBuffer();
         valido = (leidos == 1) && (numero >= minimo && numero <= maximo);
         if (!valido) {
@@ -83,7 +101,10 @@ void leerTexto(char *destino, int capacidad) {
     int longitud = 0;
 
     do {
-        fgets(destino, capacidad, stdin);
+        if (fgets(destino, capacidad, stdin) == NULL) {
+            verificarFinDeEntrada();
+            destino[0] = '\0';
+        }
         longitud = strlen(destino);
         if (longitud > 0 && destino[longitud - 1] == '\n') {
             destino[longitud - 1] = '\0';
@@ -112,6 +133,7 @@ long leerMonto(void) {
 
     do {
         leidos = scanf("%lf", &pesos);
+        verificarFinDeEntrada();
         limpiarBuffer();
         valido = (leidos == 1) && (pesos > 0);
         if (!valido) {
@@ -142,6 +164,7 @@ int leerFecha(void) {
 
     do {
         leidos = scanf("%d/%d/%d", &dia, &mes, &anio);
+        verificarFinDeEntrada();
         limpiarBuffer();
         valido = (leidos == 3) && (mes >= 1 && mes <= 12) && (anio >= 2000);
         if (valido) {
