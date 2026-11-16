@@ -2,8 +2,8 @@
  * Archivo:     main.c
  * Proyecto:    Micha y Micha
  * Autor:       Luis Adrian Villanueva Valdivia
- * Fecha:       30/10/2026
- * Version:     0.3
+ * Fecha:       16/11/2026
+ * Version:     1.0
  * Descripcion: Punto de entrada y menu principal. Cada opcion llama a
  *              una funcion de su modulo; aqui no va logica de negocio.
  */
@@ -395,6 +395,54 @@ static void menuAdministracion(Usuario usuarios[], int *numUsuarios,
     }
 }
 
+/*
+ * Funcion:     guardarTodo
+ * Descripcion: Guarda todos los datos del sistema en sus archivos y avisa
+ *              cuales no se pudieron guardar (RF-16, CU-12).
+ * Parametros:  los arreglos del sistema y cuantos elementos tiene cada uno.
+ * Retorno:     1 si se guardo todo, 0 si fallo algun archivo.
+ */
+static int guardarTodo(const Usuario usuarios[], int numUsuarios,
+                       const Grupo grupos[], int numGrupos,
+                       const MiembroGrupo miembros[], int numMiembros,
+                       const Categoria categorias[], int numCategorias,
+                       const Gasto gastos[], int numGastos,
+                       const DivisionGasto divisiones[], int numDivisiones,
+                       const Liquidacion liquidaciones[],
+                       int numLiquidaciones) {
+    int todoBien = 1;
+
+    if (!guardarUsuarios(usuarios, numUsuarios)) {
+        printf("Error: no se pudieron guardar los usuarios.\n");
+        todoBien = 0;
+    }
+    if (!guardarGrupos(grupos, numGrupos)) {
+        printf("Error: no se pudieron guardar los grupos.\n");
+        todoBien = 0;
+    }
+    if (!guardarMiembros(miembros, numMiembros)) {
+        printf("Error: no se pudieron guardar los miembros.\n");
+        todoBien = 0;
+    }
+    if (!guardarCategorias(categorias, numCategorias)) {
+        printf("Error: no se pudieron guardar las categorias.\n");
+        todoBien = 0;
+    }
+    if (!guardarGastos(gastos, numGastos)) {
+        printf("Error: no se pudieron guardar los gastos.\n");
+        todoBien = 0;
+    }
+    if (!guardarDivisiones(divisiones, numDivisiones)) {
+        printf("Error: no se pudieron guardar las divisiones.\n");
+        todoBien = 0;
+    }
+    if (!guardarLiquidaciones(liquidaciones, numLiquidaciones)) {
+        printf("Error: no se pudieron guardar las liquidaciones.\n");
+        todoBien = 0;
+    }
+    return todoBien;
+}
+
 int main(void) {
     /* Datos del sistema: un arreglo y un contador por estructura */
     Usuario usuarios[MAX_USUARIOS];
@@ -561,29 +609,29 @@ int main(void) {
                                    usuarioActivo, &idGrupoActivo);
                 break;
             case 0:
-                                /* Guardado de datos al salir (RF-16) */
-                if (!guardarUsuarios(usuarios, numUsuarios)) {
-                    printf("Error: no se pudieron guardar los usuarios.\n");
+                /* Guardado de datos al salir (RF-16). Si algo falla, los
+                   datos siguen en memoria y se puede reintentar (CU-12 E1) */
+                while (opcion == 0 &&
+                       !guardarTodo(usuarios, numUsuarios, grupos, numGrupos,
+                                    miembros, numMiembros, categorias,
+                                    numCategorias, gastos, numGastos,
+                                    divisiones, numDivisiones, liquidaciones,
+                                    numLiquidaciones)) {
+                    printf("Revisa que exista la carpeta datos/ y que los "
+                           "archivos no esten abiertos.\n");
+                    printf("1. Reintentar\n");
+                    printf("2. Salir sin guardar\n");
+                    printf("Opcion: ");
+                    if (leerEntero(1, 2) == 2) {
+                        opcion = -1; /* Sale sin guardar */
+                    }
                 }
-                if (!guardarGrupos(grupos, numGrupos)) {
-                    printf("Error: no se pudieron guardar los grupos.\n");
+                if (opcion == 0) {
+                    printf("Datos guardados. Hasta luego.\n");
+                } else {
+                    printf("Los cambios no guardados se perdieron. Hasta luego.\n");
+                    opcion = 0;
                 }
-                if (!guardarMiembros(miembros, numMiembros)) {
-                    printf("Error: no se pudieron guardar los miembros.\n");
-                }
-                if (!guardarCategorias(categorias, numCategorias)) {
-                    printf("Error: no se pudieron guardar las categorias.\n");
-                }
-                if (!guardarGastos(gastos, numGastos)) {
-                    printf("Error: no se pudieron guardar los gastos.\n");
-                }
-                if (!guardarDivisiones(divisiones, numDivisiones)) {
-                    printf("Error: no se pudieron guardar las divisiones.\n");
-                }
-                if (!guardarLiquidaciones(liquidaciones, numLiquidaciones)) {
-                    printf("Error: no se pudieron guardar las liquidaciones.\n");
-                }
-                printf("Datos guardados. Hasta luego.\n");
                 break;
         }
     } while (opcion != 0);
