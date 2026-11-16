@@ -6,7 +6,7 @@
  * Version:     1.0
  * Descripcion: Implementacion de los reportes. Los ordenamientos se
  *              hacen sobre arreglos de indices para no cambiar el orden de
- *              los datos originales (RF-13, RF-14, CU-07, CU-08).
+ *              los datos originales (RF-13, RF-14, RF-15, CU-07, CU-08).
  */
 #include <stdio.h>
 #include "reportes.h"
@@ -283,5 +283,96 @@ void reportePorCategoria(int idGrupo,
     }
     printf("Total: ");
     mostrarMonto(total);
+    printf("\n");
+}
+
+/*
+ * Funcion:     reportePorPersona
+ * Descripcion: Para los gastos del grupo (todos o de un mes) muestra, por
+ *              cada miembro, cuanto pago, cuanto le tocaba segun las
+ *              divisiones y la diferencia (positiva = puso de mas,
+ *              negativa = puso de menos). Tambien aparecen, marcados con
+ *              "(ex)", quienes ya salieron del grupo pero tienen gastos en
+ *              el periodo. Al final muestra los totales, que coinciden
+ *              (RF-15).
+ * Parametros:  idGrupo                   - id del grupo activo
+ *              gastos, numGastos         - gastos del sistema
+ *              divisiones, numDivisiones - divisiones de los gastos
+ *              usuarios, numUsuarios     - usuarios (para los nombres)
+ *              miembros, numMiembros     - membresias de los grupos
+ * Retorno:     Ninguno.
+ */
+void reportePorPersona(int idGrupo,
+                       const Gasto gastos[], int numGastos,
+                       const DivisionGasto divisiones[], int numDivisiones,
+                       const Usuario usuarios[], int numUsuarios,
+                       const MiembroGrupo miembros[], int numMiembros) {
+    int indices[MAX_GASTOS];
+    int numIndices = 0;
+    long pagado = 0;
+    long tocaba = 0;
+    long totalPagado = 0;
+    long totalTocaba = 0;
+    int idUsuario = 0;
+    int esMiembro = 0;
+    int mes = 0;
+    int anio = 0;
+    int u = 0;
+    int m = 0;
+    int i = 0;
+    int d = 0;
+
+    printf("\n--- Gastos por persona ---\n");
+    pedirPeriodo(&mes, &anio);
+
+    numIndices = indicesDelGrupo(gastos, numGastos, idGrupo, mes, anio,
+                                 indices);
+    if (numIndices == 0) {
+        printf("No hay gastos para mostrar.\n");
+        return;
+    }
+
+    printf("%-15s  %12s  %12s  %12s\n", "Persona", "Pago", "Le tocaba",
+           "Diferencia");
+    for (u = 0; u < numUsuarios; u++) {
+        idUsuario = usuarios[u].id;
+        esMiembro = 0;
+        for (m = 0; m < numMiembros; m++) {
+            if (miembros[m].idGrupo == idGrupo &&
+                miembros[m].idUsuario == idUsuario) {
+                esMiembro = 1;
+            }
+        }
+        pagado = 0;
+        tocaba = 0;
+        for (i = 0; i < numIndices; i++) {
+            if (gastos[indices[i]].idPagador == idUsuario) {
+                pagado += gastos[indices[i]].montoCentavos;
+            }
+            for (d = 0; d < numDivisiones; d++) {
+                if (divisiones[d].idGasto == gastos[indices[i]].id &&
+                    divisiones[d].idUsuario == idUsuario) {
+                    tocaba += divisiones[d].montoCentavos;
+                }
+            }
+        }
+        if (!esMiembro && pagado == 0 && tocaba == 0) {
+            continue; /* No tiene nada que ver con este grupo */
+        }
+        totalPagado += pagado;
+        totalTocaba += tocaba;
+
+        printf("%-10.10s %-4s  ", usuarios[u].nombre, esMiembro ? "" : "(ex)");
+        mostrarMonto(pagado);
+        printf("  ");
+        mostrarMonto(tocaba);
+        printf("  ");
+        mostrarMonto(pagado - tocaba);
+        printf("\n");
+    }
+    printf("Totales: pagado ");
+    mostrarMonto(totalPagado);
+    printf(", repartido ");
+    mostrarMonto(totalTocaba);
     printf("\n");
 }
