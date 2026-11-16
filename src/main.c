@@ -66,6 +66,8 @@ static void mostrarMenuPrincipal(const Usuario usuarios[], int usuarioActivo,
  */
 static void menuReportes(const Gasto gastos[], int numGastos,
                          const DivisionGasto divisiones[], int numDivisiones,
+                         const Liquidacion liquidaciones[],
+                         int numLiquidaciones,
                          const Usuario usuarios[], int numUsuarios,
                          const MiembroGrupo miembros[], int numMiembros,
                          const Categoria categorias[], int numCategorias,
@@ -88,7 +90,8 @@ static void menuReportes(const Gasto gastos[], int numGastos,
 
         switch (opcion) {
             case 1:
-                mostrarHistorial(idGrupoActivo, gastos, numGastos, usuarios,
+                mostrarHistorial(idGrupoActivo, gastos, numGastos,
+                                 liquidaciones, numLiquidaciones, usuarios,
                                  numUsuarios, categorias, numCategorias);
                 break;
             case 2:
@@ -570,8 +573,9 @@ int main(void) {
                 break;
             case 5:
                 menuReportes(gastos, numGastos, divisiones, numDivisiones,
-                             usuarios, numUsuarios, miembros, numMiembros,
-                             categorias, numCategorias, idGrupoActivo);
+                             liquidaciones, numLiquidaciones, usuarios,
+                             numUsuarios, miembros, numMiembros, categorias,
+                             numCategorias, idGrupoActivo);
                 break;
             case 6:
                 idElegido = cambiarGrupoActivo(grupos, numGrupos, miembros,
