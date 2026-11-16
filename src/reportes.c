@@ -138,19 +138,99 @@ static void ordenarPorFecha(const Gasto gastos[], int indices[], int n) {
 }
 
 /*
+ * Funcion:     mostrarPagos
+ * Descripcion: Muestra las liquidaciones (pagos entre roomies) del grupo,
+ *              de todas las fechas o de un mes, de la mas reciente a la
+ *              mas antigua, con su total (RF-13).
+ * Parametros:  idGrupo                         - id del grupo activo
+ *              mes, anio                       - periodo (0 = todos)
+ *              liquidaciones, numLiquidaciones - pagos del sistema
+ *              usuarios, numUsuarios           - usuarios (para los nombres)
+ * Retorno:     Ninguno.
+ */
+static void mostrarPagos(int idGrupo, int mes, int anio,
+                         const Liquidacion liquidaciones[],
+                         int numLiquidaciones,
+                         const Usuario usuarios[], int numUsuarios) {
+    int indices[MAX_LIQUIDACIONES];
+    int cuantos = 0;
+    int i = 0;
+    int j = 0;
+    int mayor = 0;
+    int temporal = 0;
+    int fecha = 0;
+    long total = 0;
+
+    /* Se juntan los pagos del grupo y del periodo */
+    for (i = 0; i < numLiquidaciones; i++) {
+        fecha = liquidaciones[i].fecha;
+        if (liquidaciones[i].idGrupo != idGrupo) {
+            continue;
+        }
+        if (mes != 0 && ((fecha / 100) % 100 != mes || fecha / 10000 != anio)) {
+            continue;
+        }
+        indices[cuantos] = i;
+        cuantos++;
+    }
+
+    printf("\n--- Pagos entre roomies ---\n");
+    if (cuantos == 0) {
+        printf("No hay pagos registrados en este periodo.\n");
+        return;
+    }
+
+    /* Seleccion: del pago mas reciente al mas antiguo */
+    for (i = 0; i < cuantos - 1; i++) {
+        mayor = i;
+        for (j = i + 1; j < cuantos; j++) {
+            if (liquidaciones[indices[j]].fecha >
+                liquidaciones[indices[mayor]].fecha) {
+                mayor = j;
+            }
+        }
+        temporal = indices[i];
+        indices[i] = indices[mayor];
+        indices[mayor] = temporal;
+    }
+
+    printf("%-10s  %-12s     %-12s  %10s\n", "Fecha", "Pago", "Recibio",
+           "Monto");
+    for (i = 0; i < cuantos; i++) {
+        j = indices[i];
+        fecha = liquidaciones[j].fecha;
+        printf("%02d/%02d/%04d  %-12.12s  -> %-12.12s  ", fecha % 100,
+               (fecha / 100) % 100, fecha / 10000,
+               nombreUsuarioRep(usuarios, numUsuarios,
+                                liquidaciones[j].idDeudor),
+               nombreUsuarioRep(usuarios, numUsuarios,
+                                liquidaciones[j].idAcreedor));
+        mostrarMonto(liquidaciones[j].montoCentavos);
+        printf("\n");
+        total += liquidaciones[j].montoCentavos;
+    }
+    printf("Total de %d pago(s): ", cuantos);
+    mostrarMonto(total);
+    printf("\n");
+}
+
+/*
  * Funcion:     mostrarHistorial
  * Descripcion: Pregunta si se quiere ver todo el historial o solo un mes,
  *              y muestra los gastos del grupo ordenados del mas reciente
  *              al mas antiguo con fecha, descripcion, categoria, quien
- *              pago y monto. Al final muestra el total (RF-13, CU-07).
- * Parametros:  idGrupo                   - id del grupo activo
- *              gastos, numGastos         - gastos del sistema
- *              usuarios, numUsuarios     - usuarios (para los nombres)
- *              categorias, numCategorias - categorias (para los nombres)
+ *              pago y monto, con su total. Despues muestra los pagos
+ *              entre roomies del mismo periodo (RF-13, CU-07).
+ * Parametros:  idGrupo                         - id del grupo activo
+ *              gastos, numGastos               - gastos del sistema
+ *              liquidaciones, numLiquidaciones - pagos del sistema
+ *              usuarios, numUsuarios           - usuarios (para los nombres)
+ *              categorias, numCategorias       - categorias (para los nombres)
  * Retorno:     Ninguno.
  */
 void mostrarHistorial(int idGrupo,
                       const Gasto gastos[], int numGastos,
+                      const Liquidacion liquidaciones[], int numLiquidaciones,
                       const Usuario usuarios[], int numUsuarios,
                       const Categoria categorias[], int numCategorias) {
     int indices[MAX_GASTOS];
@@ -167,6 +247,8 @@ void mostrarHistorial(int idGrupo,
     cuantos = indicesDelGrupo(gastos, numGastos, idGrupo, mes, anio, indices);
     if (cuantos == 0) {
         printf("No hay gastos para mostrar.\n");
+        mostrarPagos(idGrupo, mes, anio, liquidaciones, numLiquidaciones,
+                     usuarios, numUsuarios);
         return;
     }
     ordenarPorFecha(gastos, indices, cuantos);
@@ -188,6 +270,9 @@ void mostrarHistorial(int idGrupo,
     printf("Total de %d gasto(s): ", cuantos);
     mostrarMonto(total);
     printf("\n");
+
+    mostrarPagos(idGrupo, mes, anio, liquidaciones, numLiquidaciones,
+                 usuarios, numUsuarios);
 }
 
 /*
